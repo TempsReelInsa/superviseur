@@ -174,3 +174,36 @@ int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
 
     return err;
 }
+
+void print_status(int status){
+    switch(status){
+        default:
+        case STATUS_OK: 
+            rt_printf(" ------------> STATUS_OK\n");
+            break;
+        case STATUS_ERR_NO_FILE:
+            rt_printf(" ------------> STATUS_ERR_NO_FILE\n");
+            break;
+        case STATUS_ERR_TIMEOUT: 
+            rt_printf(" ------------> STATUS_ERR_TIMEOUT\n");
+            break;
+        case STATUS_ERR_UNKNOWN_CMD: 
+            rt_printf(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
+            break;
+        case STATUS_ERR_INVALID_PARAMS: 
+            rt_printf(" ------------> STATUS_ERR_INVALID_PARAMS\n");
+            break;
+        case STATUS_ERR_WDT_EXPIRED: 
+            rt_printf(" ------------> STATUS_ERR_WDT_EXPIRED\n");
+            break;
+        case STATUS_ERR_SELECT: 
+            rt_printf(" ------------> STATUS_ERR_SELECT\n");
+            break;
+        case STATUS_ERR_UNKNOWN: 
+            rt_printf(" ------------> STATUS_ERR_UNKNOWN\n");
+            break;
+        case STATUS_ERR_CHECKSUM: 
+            rt_printf(" ------------> STATUS_ERR_CHECKSUM\n");
+            break;  
+    }
+}
