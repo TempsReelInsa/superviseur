@@ -8,7 +8,7 @@ LIB= -lopencv_core -lopencv_highgui -lopencv_imgproc -lxenomai -lnative -L../xen
 all: main
 
 
-main: $(OBJ) 						
+main: $(OBJ)
 	$(LINK) $(OBJ) $(OBJ_SRC) -o robot $(LIB)
 
 
@@ -24,7 +24,7 @@ main.o: main.c global.h fonctions.h
 	$(CC) -g -Wall $(CFLAGS) -c main.c -o main.o
 
 
-dmessage.o: ../lib_destijl/source/dmessage.c ../lib_destijl/headers/dmessage.h ../lib_destijl/headers/dtools.h  
+dmessage.o: ../lib_destijl/source/dmessage.c ../lib_destijl/headers/dmessage.h ../lib_destijl/headers/dtools.h
 	cd ../lib_destijl/source; echo "entering source"; \
 	$(CC) -g -Wall $(CFLAGS)  -c *.c
 	cd ..

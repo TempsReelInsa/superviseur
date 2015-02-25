@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   includes.h
  * Author: pehladik
  *
@@ -22,7 +22,6 @@
 #include <rtdk.h>
 #include <syslog.h>
 
-#include "../lib_destijl/headers/dincludes.h"
+#include "dincludes.h"
 
 #endif	/* INCLUDES_H */
-

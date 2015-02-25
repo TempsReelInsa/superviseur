@@ -29,3 +29,5 @@
 *.hex
 
 robot
+
+.DS_Store
