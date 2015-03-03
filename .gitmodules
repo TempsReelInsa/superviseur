@@ -4,3 +4,4 @@
 [submodule "lib_destijl"]
 	path = lib_destijl
 	url = https://github.com/TempsReelInsa/lib_destijl.git
+	branch = master
