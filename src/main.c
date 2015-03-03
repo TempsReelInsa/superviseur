@@ -53,41 +53,41 @@ int main(int argc, char**argv) {
 void initStruct(void) {
     int err;
     /* Creation des mutex */
-    if (err = rt_mutex_create(&mutexEtat, NULL)) {
+    if ((err = rt_mutex_create(&mutexEtat, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_mutex_create(&mutexMove, NULL)) {
+    if ((err = rt_mutex_create(&mutexMove, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
     /* Creation du semaphore */
-    if (err = rt_sem_create(&semConnecterRobot, NULL, 0, S_FIFO)) {
+    if ((err = rt_sem_create(&semConnecterRobot, NULL, 0, S_FIFO))) {
         rt_printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
     /* Creation des taches */
-    if (err = rt_task_create(&tServeur, NULL, 0, PRIORITY_TSERVEUR, 0)) {
+    if ((err = rt_task_create(&tServeur, NULL, 0, PRIORITY_TSERVEUR, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&tconnect, NULL, 0, PRIORITY_TCONNECT, 0)) {
+    if ((err = rt_task_create(&tconnect, NULL, 0, PRIORITY_TCONNECT, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&tmove, NULL, 0, PRIORITY_TMOVE, 0)) {
+    if ((err = rt_task_create(&tmove, NULL, 0, PRIORITY_TMOVE, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&tenvoyer, NULL, 0, PRIORITY_TENVOYER, 0)) {
+    if ((err = rt_task_create(&tenvoyer, NULL, 0, PRIORITY_TENVOYER, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
     /* Creation des files de messages */
-    if (err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO)){
+    if ((err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO))){
         rt_printf("Error msg queue create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -100,19 +100,19 @@ void initStruct(void) {
 
 void startTasks() {
     int err;
-    if (err = rt_task_start(&tconnect, &connecter, NULL)) {
+    if ((err = rt_task_start(&tconnect, &connecter, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_start(&tServeur, &communiquer, NULL)) {
+    if ((err = rt_task_start(&tServeur, &communiquer, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_start(&tmove, &deplacer, NULL)) {
+    if ((err = rt_task_start(&tmove, &deplacer, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_start(&tenvoyer, &envoyer, NULL)) {
+    if ((err = rt_task_start(&tenvoyer, &envoyer, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
