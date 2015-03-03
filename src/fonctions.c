@@ -68,6 +68,11 @@ void communiquer(void *arg) {
 
     while (1) {
         rt_printf("tserver : Attente d'un message\n");
+
+        rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+        etatCommMoniteur = 1;
+        rt_mutex_release(&mutexEtat);
+
         var1 = serveur->receive(serveur, msg);
         num_msg++;
         if (var1 > 0) {
@@ -96,6 +101,9 @@ void communiquer(void *arg) {
         }
         else{
             rt_printf("Client disconnected, stopping robot and restarting server\n");
+            rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+            etatCommMoniteur = 0;
+            rt_mutex_release(&mutexEtat);
             rt_mutex_acquire(&mutexMove, TM_INFINITE);
             move->set(move, DIRECTION_STOP, 0);
             move->print(move);
@@ -231,6 +239,44 @@ void batterie_state(void * args){
             }
         }
     }
+}
+
+/*
+* Periodic thread 600ms
+* Send images to client if connected
+*/
+void images(void * args){
+
+    int status;
+    DImage *image = d_new_image();
+    DJpegimage *jpeg = d_new_jpegimage();
+    DMessage *message = d_new_message();
+
+    rt_task_set_periodic(NULL, TM_NOW, 600000000);
+    
+    while (1) {
+        rt_task_wait_period(NULL);
+        rt_printf("tImagesThread : Activation périodique\n");
+
+        rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+        status = etatCommMoniteur;
+        rt_mutex_release(&mutexEtat);
+
+        if(status == 1)
+        {
+            if(camera->get_frame(camera, image) == 0)
+            {
+                jpeg->compress(jpeg, image);
+                message->put_jpeg_image(message, jpeg);
+                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                    message->free(message);
+                }
+            } else {
+                rt_printf("tImagesThread : impossible de toper l'image....\n");
+            }
+        }
+    }
+
 }
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
