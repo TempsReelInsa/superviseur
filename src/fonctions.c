@@ -173,6 +173,48 @@ void deplacer(void *arg) {
         }
     }
 }
+/*
+* Periodic thread 250ms
+* Check batterie state 
+*/
+void batterie_state(void * args){
+
+    int status = 1;
+    int battery = -1;
+    int nbrErreur = 0;
+
+
+    rt_task_set_periodic(NULL, TM_NOW, 250000000);
+    
+    while (1) {
+        rt_task_wait_period(NULL);
+        rt_printf("tBatterieThread : Activation périodique\n");
+
+        rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+        status = etatCommRobot;
+        rt_mutex_release(&mutexEtat);
+
+        print_status(status);
+        if (status == STATUS_OK) {
+            rt_mutex_acquire(&mutexMove, TM_INFINITE);
+            status = robot->get_vbat(robot, &battery);
+            rt_mutex_release(&mutexMove);
+            
+            if(status == STATUS_OK){
+                nbrErreur = 0;
+            }
+            else if(status != STATUS_OK && nbrErreur<3){
+                nbrErreur++;
+                status = STATUS_OK;
+            }
+            else{
+                rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+                etatCommRobot = status;
+                rt_mutex_release(&mutexEtat);
+            }
+        }
+    }
+}
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
     void *msg;

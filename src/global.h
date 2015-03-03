@@ -15,6 +15,7 @@ extern RT_TASK tServeur;
 extern RT_TASK tconnect;
 extern RT_TASK tmove;
 extern RT_TASK tenvoyer;
+extern RT_TASK tbatterie_state;
 
 /* @descripteurs des mutex */
 extern RT_MUTEX mutexEtat;
