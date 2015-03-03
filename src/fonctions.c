@@ -20,6 +20,7 @@ void envoyer(void * arg) {
 
 void connecter(void * arg) {
     int status;
+    int version_min,version_max;
     DMessage *message;
 
     rt_printf("tconnect : Debut de l'exécution de tconnect\n");
@@ -37,7 +38,18 @@ void connecter(void * arg) {
         if (status == STATUS_OK) {
             status = robot->start_insecurely(robot);
             if (status == STATUS_OK){
-                rt_printf("tconnect : Robot démarrer\n");
+                rt_printf("********>tconnect : Robot démarrer<**********\n");
+
+                rt_mutex_acquire(&mutexMove, TM_INFINITE);
+                robot->get_version(robot, &version_max, &version_min);
+                rt_mutex_release(&mutexMove);
+
+                message = d_new_message();
+                message->put_version(message,version_max,version_min);
+                
+                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                    message->free(message);
+                }
             }
         }
 
