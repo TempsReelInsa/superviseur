@@ -104,8 +104,8 @@ void deplacer(void *arg) {
     unsigned int nbrErreur = 0;
     DMessage *message;
 
-    rt_printf("tmove : Debut de l'éxecution de periodique à 1s\n");
-    rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+    rt_printf("tmove : Debut de l'éxecution de periodique à 200ms\n");
+    rt_task_set_periodic(NULL, TM_NOW, 200000000);
 
     while (1) {
         /* Attente de l'activation périodique */
