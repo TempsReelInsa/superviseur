@@ -106,11 +106,15 @@ void communiquer(void *arg) {
                     break;
             }
         }
-        else{rt_mutex_acquire(&mutexMove, TM_INFINITE);
-                    move->set(move, DIRECTION_STOP, 0);
-                    move->print(move);
-                    rt_mutex_release(&mutexMove);
-            serveur->open(serveur, "8000");}
+        else{
+            rt_printf("Client disconnected, stopping robot and restarting server\n");
+            rt_mutex_acquire(&mutexMove, TM_INFINITE);
+            move->set(move, DIRECTION_STOP, 0);
+            move->print(move);
+            rt_mutex_release(&mutexMove);
+            serveur->close(serveur);
+            serveur->open(serveur, "8000");
+        }
     }
 }
 
