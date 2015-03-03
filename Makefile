@@ -5,5 +5,5 @@ all:
 clean:
 	make -C src clean
 
-install: 
+install: all
 	./upload.sh $(ROBOT)  src/robot
