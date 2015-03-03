@@ -11,6 +11,7 @@ RT_TASK tServeur;
 RT_TASK tconnect;
 RT_TASK tmove;
 RT_TASK tenvoyer;
+RT_TASK tbatterie_state;
 
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
