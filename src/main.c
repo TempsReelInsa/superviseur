@@ -85,7 +85,7 @@ void initStruct(void) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&tbatterie_state, NULL, 0, PRIORITY_TMOVE, 0)) {
+    if ((err = rt_task_create(&tbatterie_state, NULL, 0, PRIORITY_TMOVE, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -120,7 +120,7 @@ void startTasks() {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_start(&tbatterie_state, &batterie_state, NULL)) {
+    if ((err = rt_task_start(&tbatterie_state, &batterie_state, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
