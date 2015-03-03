@@ -66,7 +66,7 @@ void communiquer(void *arg) {
     etatCommMoniteur = 0;
     rt_mutex_release(&mutexEtat);
 
-    while (var1 > 0) {
+    while (1) {
         rt_printf("tserver : Attente d'un message\n");
         var1 = serveur->receive(serveur, msg);
         num_msg++;
@@ -94,6 +94,11 @@ void communiquer(void *arg) {
                     break;
             }
         }
+        else{rt_mutex_acquire(&mutexMove, TM_INFINITE);
+                    move->set(move, DIRECTION_STOP, 0);
+                    move->print(move);
+                    rt_mutex_release(&mutexMove);
+            serveur->open(serveur, "8000");}
     }
 }
 
