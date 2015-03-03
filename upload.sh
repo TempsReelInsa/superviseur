@@ -7,5 +7,5 @@ if [ $# -ne 0 ]; then
         touch sftp_cmd.txt
         echo "put "$2"" >> sftp_cmd.txt
 
-	sftp -o "batchmode no" -b sftp_cmd.txt insa@geitp-trs$1
+	sftp -o "batchmode no" -b sftp_cmd.txt insa@geitp-trs$1 
 fi;
