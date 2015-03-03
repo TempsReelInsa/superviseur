@@ -175,9 +175,9 @@ void deplacer(void *arg) {
 void batterie_state(void * args){
 
     int status = 1;
-    int battery = -1;
+    int tmp_battery = -1;
     int nbrErreur = 0;
-
+    DMessage *message;
 
     rt_task_set_periodic(NULL, TM_NOW, 250000000);
     
@@ -191,12 +191,25 @@ void batterie_state(void * args){
 
         print_status(status);
         if (status == STATUS_OK) {
-            rt_mutex_acquire(&mutexMove, TM_INFINITE);
-            status = robot->get_vbat(robot, &battery);
-            rt_mutex_release(&mutexMove);
+            message = d_new_message();    
             
+            rt_mutex_acquire(&mutexMove, TM_INFINITE);
+            status = robot->get_vbat(robot, &tmp_battery);
+            rt_mutex_release(&mutexMove);
+
             if(status == STATUS_OK){
                 nbrErreur = 0;
+
+                rt_mutex_acquire(&mutexBattery, TM_INFINITE);
+                if(tmp_battery!=BATTERY_LEVEL_UNKNOWN)
+                    battery->set_level(battery,tmp_battery);
+                message->put_battery_level(message,battery);
+                rt_mutex_release(&mutexBattery);
+
+                rt_printf("tbattery_state : Envoi message\n");
+                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                    message->free(message);
+                }
             }
             else if(status != STATUS_OK && nbrErreur<3){
                 nbrErreur++;

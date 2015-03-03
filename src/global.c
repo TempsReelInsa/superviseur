@@ -15,6 +15,7 @@ RT_TASK tbatterie_state;
 
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
+RT_MUTEX mutexBattery;
 
 RT_SEM semConnecterRobot;
 
@@ -25,7 +26,7 @@ int etatCommRobot = 1;
 DRobot *robot;
 DMovement *move;
 DServer *serveur;
-
+DBattery *battery;
 
 int MSG_QUEUE_SIZE = 10;
 

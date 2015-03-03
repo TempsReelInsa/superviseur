@@ -61,6 +61,10 @@ void initStruct(void) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+    if ((err = rt_mutex_create(&mutexBattery, NULL))) {
+        rt_printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
 
     /* Creation du semaphore */
     if ((err = rt_sem_create(&semConnecterRobot, NULL, 0, S_FIFO))) {
@@ -100,6 +104,7 @@ void initStruct(void) {
     robot = d_new_robot();
     move = d_new_movement();
     serveur = d_new_server();
+    battery = d_new_battery();
 }
 
 void startTasks() {

@@ -20,6 +20,7 @@ extern RT_TASK tbatterie_state;
 /* @descripteurs des mutex */
 extern RT_MUTEX mutexEtat;
 extern RT_MUTEX mutexMove;
+extern RT_MUTEX mutexBattery;
 
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
@@ -33,6 +34,7 @@ extern int etatCommRobot;
 extern DServer *serveur;
 extern DRobot *robot;
 extern DMovement *move;
+extern DBattery *battery;
 
 /* @constantes */
 extern int MSG_QUEUE_SIZE;
