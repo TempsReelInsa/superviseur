@@ -73,28 +73,28 @@ void initStruct(void) {
     }
 
     /* Creation des taches */
-    if ((err = rt_task_create(&tServeur, NULL, 0, PRIORITY_TSERVEUR, 0))) {
+    if ((err = rt_task_create(&task_thread_recv_monitor, NULL, 0, PRIORITY_RECV_MONITOR, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if ((err = rt_task_create(&tconnect, NULL, 0, PRIORITY_TCONNECT, 0))) {
+    if ((err = rt_task_create(&task_thread_connect_robot, NULL, 0, PRIORITY_CONNECT_ROBOT, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if ((err = rt_task_create(&tmove, NULL, 0, PRIORITY_TMOVE, 0))) {
+    if ((err = rt_task_create(&task_thread_move_robot, NULL, 0, PRIORITY_MOVE_ROBOT, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if ((err = rt_task_create(&tenvoyer, NULL, 0, PRIORITY_TENVOYER, 0))) {
+    if ((err = rt_task_create(&task_thread_send_monitor, NULL, 0, PRIORITY_SEND_MONITOR, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if ((err = rt_task_create(&tbatterie_state, NULL, 0, PRIORITY_TBATTERIE, 0))) {
+    if ((err = rt_task_create(&task_thread_battery_state, NULL, 0, PRIORITY_BATTERY_STATE, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
-    if ((err = rt_task_create(&tImages, NULL, 0, PRIORITY_IMAGES, 0))) {
+    if ((err = rt_task_create(&task_thread_image, NULL, 0, PRIORITY_IMAGE, 0))) {
         rt_printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -115,28 +115,32 @@ void initStruct(void) {
 
 void startTasks() {
     int err;
-    if ((err = rt_task_start(&tconnect, &connecter, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_start(&tServeur, &communiquer, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_start(&tmove, &deplacer, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_start(&tenvoyer, &envoyer, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_start(&tbatterie_state, &batterie_state, NULL))) {
+
+    if ((err = rt_task_start(&task_thread_recv_monitor, &thread_recv_monitor, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
 
-    if ((err = rt_task_start(&tImages, &images, NULL))) {
+    if ((err = rt_task_start(&task_thread_connect_robot, &thread_connect_robot, NULL))) {
+        rt_printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
+    if ((err = rt_task_start(&task_thread_move_robot, &thread_move_robot, NULL))) {
+        rt_printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
+    if ((err = rt_task_start(&task_thread_send_monitor, &thread_send_monitor, NULL))) {
+        rt_printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if ((err = rt_task_start(&task_thread_battery_state, &thread_battery_state, NULL))) {
+        rt_printf("Error task start: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
+    if ((err = rt_task_start(&task_thread_image, &thread_image, NULL))) {
         rt_printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -144,9 +148,10 @@ void startTasks() {
 }
 
 void deleteTasks() {
-    rt_task_delete(&tServeur);
-    rt_task_delete(&tconnect);
-    rt_task_delete(&tmove);
-    rt_task_delete(&tbatterie_state);
-    rt_task_delete(&tImages);
+    rt_task_delete(&task_thread_recv_monitor);
+    rt_task_delete(&task_thread_connect_robot);
+    rt_task_delete(&task_thread_move_robot);
+    rt_task_delete(&task_thread_send_monitor);
+    rt_task_delete(&task_thread_battery_state);
+    rt_task_delete(&task_thread_image);
 }

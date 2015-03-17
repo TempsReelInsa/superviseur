@@ -7,12 +7,13 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-        void connecter (void * arg);
-        void communiquer(void *arg);
-        void deplacer(void *arg);
-        void envoyer(void *arg);
+		void thread_send_monitor(void *arg);
+        void thread_connect_robot(void * arg);
+        void thread_recv_monitor(void *arg);
+        void thread_move_robot(void *arg);
+        void thread_battery_state(void * args);
+        void thread_image(void *args);
         void print_status(int status);
-        void batterie_state(void * args);
         void images(void *args);
 #ifdef	__cplusplus
 }

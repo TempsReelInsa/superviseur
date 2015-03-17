@@ -7,12 +7,13 @@
 
 #include "global.h"
 
-RT_TASK tServeur;
-RT_TASK tconnect;
-RT_TASK tmove;
-RT_TASK tenvoyer;
-RT_TASK tbatterie_state;
-RT_TASK tImages;
+RT_TASK task_thread_batterie_state;
+RT_TASK task_thread_connect_robot;
+RT_TASK task_thread_recv_monitor;
+RT_TASK task_thread_send_monitor;
+RT_TASK task_thread_move_robot;
+RT_TASK task_thread_battery_state;
+RT_TASK task_thread_image;
 
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
@@ -32,9 +33,9 @@ DCamera *camera;
 
 int MSG_QUEUE_SIZE = 10;
 
-int PRIORITY_TSERVEUR = 30;
-int PRIORITY_TCONNECT = 20;
-int PRIORITY_TMOVE = 10;
-int PRIORITY_TENVOYER = 25;
-int PRIORITY_TBATTERIE = 25; 
-int PRIORITY_IMAGES = 25;
+int PRIORITY_RECV_MONITOR = 30;
+int PRIORITY_CONNECT_ROBOT = 20;
+int PRIORITY_MOVE_ROBOT = 10;
+int PRIORITY_SEND_MONITOR = 25;
+int PRIORITY_BATTERY_STATE = 25; 
+int PRIORITY_IMAGE = 25;

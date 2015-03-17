@@ -2,7 +2,7 @@
 
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size);
 
-void envoyer(void * arg) {
+void thread_send_monitor(void * arg) {
     DMessage *msg;
     int err;
 
@@ -19,7 +19,7 @@ void envoyer(void * arg) {
     }
 }
 
-void connecter(void * arg) {
+void thread_connect_robot(void * arg) {
     int status;
     int version_min,version_max;
     DMessage *message;
@@ -66,7 +66,7 @@ void connecter(void * arg) {
     }
 }
 
-void communiquer(void *arg) {
+void thread_recv_monitor(void *arg) {
     DMessage *msg = d_new_message();
     int var1 = 1;
     int num_msg = 0;
@@ -127,7 +127,7 @@ void communiquer(void *arg) {
     }
 }
 
-void deplacer(void *arg) {
+void thread_move_robot(void *arg) {
     int status = 1;
     int gauche;
     int droite;
@@ -202,7 +202,7 @@ void deplacer(void *arg) {
 * Periodic thread 250ms
 * Check batterie state 
 */
-void batterie_state(void * args){
+void thread_battery_state(void * args){
 
     int status = 1;
     int tmp_battery = -1;
@@ -258,7 +258,7 @@ void batterie_state(void * args){
 * Periodic thread 600ms
 * Send images to client if connected
 */
-void images(void * args){
+void thread_image(void * args){
 
     int status;
     DImage *image = d_new_image();
