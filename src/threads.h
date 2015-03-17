@@ -1,12 +1,5 @@
-/* 
- * File:   fonctions.h
- * Author: pehladik
- *
- * Created on 12 janvier 2012, 10:19
- */
-
-#ifndef FONCTIONS_H
-#define	FONCTIONS_H
+#ifndef THREADS_H
+#define	THREADS_H
 
 #include "global.h"
 #include "includes.h"
@@ -25,5 +18,5 @@ extern "C" {
 }
 #endif
 
-#endif	/* FONCTIONS_H */
+#endif	/* THREADS_H */
 

@@ -1,6 +1,6 @@
 #include "includes.h"
 #include "global.h"
-#include "fonctions.h"
+#include "threads.h"
 
 /**
  * \fn void initStruct(void)
