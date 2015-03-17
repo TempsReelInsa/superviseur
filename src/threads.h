@@ -4,20 +4,14 @@
 #include "global.h"
 #include "includes.h"
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-		void thread_send_monitor(void *arg);
-        void thread_connect_robot(void * arg);
-        void thread_recv_monitor(void *arg);
-        void thread_move_robot(void *arg);
-        void thread_battery_state(void * args);
-        void thread_image(void *args);
-        void print_status(int status);
-        void images(void *args);
-#ifdef	__cplusplus
-}
-#endif
+void thread_send_monitor(void *arg);
+void thread_connect_robot(void * arg);
+void thread_recv_monitor(void *arg);
+void thread_move_robot(void *arg);
+void thread_battery_state(void * args);
+void thread_image(void *args);
+void print_status(int status);
+void images(void *args);
 
-#endif	/* THREADS_H */
+#endif
 
