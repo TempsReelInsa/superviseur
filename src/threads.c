@@ -1,5 +1,87 @@
 #include "threads.h"
 
+#define PRIORITY_RECV_MONITOR 30
+#define PRIORITY_CONNECT_ROBOT 20
+#define PRIORITY_MOVE_ROBOT 10
+#define PRIORITY_SEND_MONITOR 25
+#define PRIORITY_BATTERY_STATE 25
+#define PRIORITY_IMAGE 25
+
+RT_TASK *threads_tasks_tab[] = {
+    &task_thread_send_monitor,
+    &task_thread_connect_robot,
+    &task_thread_recv_monitor,
+    &task_thread_move_robot,
+    &task_thread_battery_state,
+    &task_thread_image,
+    NULL
+};
+
+void (*threads_functions_tab[])(void *) = {
+    &thread_send_monitor,
+    &thread_connect_robot,
+    &thread_recv_monitor,
+    &thread_move_robot,
+    &thread_battery_state,
+    &thread_image,
+    NULL
+};
+
+int threads_priority[] = {
+    PRIORITY_SEND_MONITOR,
+    PRIORITY_CONNECT_ROBOT,
+    PRIORITY_RECV_MONITOR,
+    PRIORITY_MOVE_ROBOT,
+    PRIORITY_BATTERY_STATE,
+    PRIORITY_IMAGE,
+    -1
+};
+
+void threads_init()
+{
+    int err;
+    int i;
+
+    for(i=0; threads_tasks_tab[i] != NULL; i++)
+    {
+        if((err = rt_task_create(threads_tasks_tab[i], NULL, 0, threads_priority[i], 0)))
+        {
+            rt_printf("Error task create: %s\n", strerror(-err));
+            exit(EXIT_FAILURE);
+        } else {
+            rt_printf("Task %d created ! \n", i);
+        }
+    }
+ 
+}
+
+void threads_start()
+{
+    int err;
+    int i;
+
+    for(i=0; threads_tasks_tab[i] != NULL; i++)
+    {
+        if((err = rt_task_start(threads_tasks_tab[i], threads_functions_tab[i], NULL)))
+        {
+            rt_printf("Error task start: %s\n", strerror(-err));
+            exit(EXIT_FAILURE);
+        } else {
+            rt_printf("Task %d started !\n", i);
+        }
+    }
+}
+
+void threads_stop()
+{
+    int i;
+    for(i=0; threads_tasks_tab[i] != NULL; i++)
+    {
+        rt_task_delete(threads_tasks_tab[i]);
+        rt_printf("Task %d stopped\n", i);
+    }
+}
+
 int write_in_queue(RT_QUEUE *msgQueue, void * data, int size);
 
 void thread_send_monitor(void * arg) {

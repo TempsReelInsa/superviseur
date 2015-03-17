@@ -43,9 +43,9 @@ int main(int argc, char**argv) {
      */
     rt_print_auto_init(1);
     initStruct();
-    startTasks();
+    threads_start();
     pause();
-    deleteTasks();
+    threads_stop();
 
     return 0;
 }
@@ -73,31 +73,7 @@ void initStruct(void) {
     }
 
     /* Creation des taches */
-    if ((err = rt_task_create(&task_thread_recv_monitor, NULL, 0, PRIORITY_RECV_MONITOR, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_create(&task_thread_connect_robot, NULL, 0, PRIORITY_CONNECT_ROBOT, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_create(&task_thread_move_robot, NULL, 0, PRIORITY_MOVE_ROBOT, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_create(&task_thread_send_monitor, NULL, 0, PRIORITY_SEND_MONITOR, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_create(&task_thread_battery_state, NULL, 0, PRIORITY_BATTERY_STATE, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = rt_task_create(&task_thread_image, NULL, 0, PRIORITY_IMAGE, 0))) {
-        rt_printf("Error task create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
+    threads_init();
 
     /* Creation des files de messages */
     if ((err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO))){
@@ -111,47 +87,4 @@ void initStruct(void) {
     serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
-}
-
-void startTasks() {
-    int err;
-
-    if ((err = rt_task_start(&task_thread_recv_monitor, &thread_recv_monitor, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = rt_task_start(&task_thread_connect_robot, &thread_connect_robot, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = rt_task_start(&task_thread_move_robot, &thread_move_robot, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = rt_task_start(&task_thread_send_monitor, &thread_send_monitor, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-    if ((err = rt_task_start(&task_thread_battery_state, &thread_battery_state, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-    if ((err = rt_task_start(&task_thread_image, &thread_image, NULL))) {
-        rt_printf("Error task start: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
-
-}
-
-void deleteTasks() {
-    rt_task_delete(&task_thread_recv_monitor);
-    rt_task_delete(&task_thread_connect_robot);
-    rt_task_delete(&task_thread_move_robot);
-    rt_task_delete(&task_thread_send_monitor);
-    rt_task_delete(&task_thread_battery_state);
-    rt_task_delete(&task_thread_image);
 }

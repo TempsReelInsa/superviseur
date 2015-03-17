@@ -4,6 +4,11 @@
 #include "global.h"
 #include "includes.h"
 
+
+void threads_init();
+void threads_start();
+void threads_stop();
+
 void thread_send_monitor(void *arg);
 void thread_connect_robot(void * arg);
 void thread_recv_monitor(void *arg);
