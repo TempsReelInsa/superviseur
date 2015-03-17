@@ -4,6 +4,8 @@
 #include "includes.h"
 #include <errno.h>
 
+void mutex_init();
+
 void mutex_robot_acquire();
 void mutex_robot_release();
 
