@@ -10,14 +10,6 @@
 
 #include "includes.h"
 
-/* @descripteurs des tâches */
-extern RT_TASK task_thread_send_monitor;
-extern RT_TASK task_thread_connect_robot;
-extern RT_TASK task_thread_recv_monitor;
-extern RT_TASK task_thread_move_robot;
-extern RT_TASK task_thread_battery_state;
-extern RT_TASK task_thread_image;
-
 /* @descripteurs des mutex */
 extern RT_MUTEX mutexEtat;
 extern RT_MUTEX mutexMove;
@@ -40,13 +32,6 @@ extern DCamera *camera;
 
 /* @constantes */
 extern int MSG_QUEUE_SIZE;
-extern int PRIORITY_RECV_MONITOR;
-extern int PRIORITY_CONNECT_ROBOT;
-extern int PRIORITY_MOVE_ROBOT;
-extern int PRIORITY_SEND_MONITOR;
-extern int PRIORITY_BATTERY_STATE; 
-extern int PRIORITY_IMAGE;
-
 
 #endif	/* GLOBAL_H */
 

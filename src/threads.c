@@ -7,6 +7,14 @@
 #define PRIORITY_BATTERY_STATE 25
 #define PRIORITY_IMAGE 25
 
+RT_TASK task_thread_batterie_state;
+RT_TASK task_thread_connect_robot;
+RT_TASK task_thread_recv_monitor;
+RT_TASK task_thread_send_monitor;
+RT_TASK task_thread_move_robot;
+RT_TASK task_thread_battery_state;
+RT_TASK task_thread_image;
+
 RT_TASK *threads_tasks_tab[] = {
     &task_thread_send_monitor,
     &task_thread_connect_robot,

@@ -7,14 +7,6 @@
 
 #include "global.h"
 
-RT_TASK task_thread_batterie_state;
-RT_TASK task_thread_connect_robot;
-RT_TASK task_thread_recv_monitor;
-RT_TASK task_thread_send_monitor;
-RT_TASK task_thread_move_robot;
-RT_TASK task_thread_battery_state;
-RT_TASK task_thread_image;
-
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
 RT_MUTEX mutexBattery;
