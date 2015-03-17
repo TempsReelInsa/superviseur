@@ -12,6 +12,7 @@ void envoyer(void * arg) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
             serveur->send(serveur, msg);
             msg->free(msg);
+            rt_queue_free(&queueMsgGUI, msg);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
         }
@@ -301,7 +302,7 @@ int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
     if ((err = rt_queue_send(msgQueue, msg, sizeof (DMessage), Q_NORMAL)) < 0) {
         rt_printf("Error msg queue send: %s\n", strerror(-err));
     }
-    rt_queue_free(&queueMsgGUI, msg);
+    
 
     return err;
 }
