@@ -99,9 +99,8 @@ void thread_send_monitor(void * arg) {
     BEGIN_THREAD();
 
     while (1) {
-        LOG_SEND_MONITOR("Attente d'un message\n");
         if ((err = msg_queue_get(&msg)) >= 0) {
-            LOG_SEND_MONITOR("envoi d'un message au moniteur\n");
+            LOG_SEND_MONITOR("Sending message to monitor ... \n");
             serveur->send(serveur, msg);
             msg->free(msg);
         } else {
@@ -164,7 +163,8 @@ void thread_connect_robot(void * arg) {
 
 void thread_recv_monitor(void *arg) {
     DMessage *msg = d_new_message();
-    int var1 = 1;
+    DAction *action;
+    int size;
     int num_msg = 0;
 
     BEGIN_THREAD();
@@ -175,38 +175,43 @@ void thread_recv_monitor(void *arg) {
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
 
-        var1 = serveur->receive(serveur, msg);
+        size = serveur->receive(serveur, msg);
         num_msg++;
-        if (var1 > 0) {
-            switch (msg->get_type(msg)) {
+
+        if (size > 0)
+        {
+            LOG_RECV_MONITOR("Message #%d\n", num_msg);
+            switch (msg->get_type(msg))
+            {
                 case MESSAGE_TYPE_ACTION:
-                    LOG_RECV_MONITOR("Le message %d reçu est une action\n",
-                            num_msg);
-                    DAction *action = d_new_action();
+                    LOG_RECV_MONITOR("MESSAGE_TYPE_ACTION\n");
+                    action = d_new_action();
                     action->from_message(action, msg);
-                    switch (action->get_order(action)) {
+                    switch (action->get_order(action))
+                    {
                         case ACTION_CONNECT_ROBOT:
-                            LOG_RECV_MONITOR("Action connecter robot\n");
+                            LOG_RECV_MONITOR("ACTION_CONNECT_ROBOT\n");
                             rt_sem_v(&semConnecterRobot);
                             break;
                     }
                     break;
                 case MESSAGE_TYPE_MOVEMENT:
-                    LOG_RECV_MONITOR("Le message reçu %d est un mouvement\n",
-                            num_msg);
-                    
+                    LOG_RECV_MONITOR("MESSAGE_TYPE_MOVEMENT\n");
                     mutex_robot_acquire();
                     move->from_message(move, msg);
                     mutex_robot_release();
                     break;
             }
         }
-        else{
+        else
+        {
+            /*
+            TODO: restart everyshit
+            */
             LOG_RECV_MONITOR("Client disconnected, stopping robot and restarting server\n");
             
             mutex_robot_acquire();
             move->set(move, DIRECTION_STOP, 0);
-            move->print(move);
             mutex_robot_release();
             
             serveur->close(serveur);
