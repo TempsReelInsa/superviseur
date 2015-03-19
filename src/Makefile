@@ -14,7 +14,7 @@ main: $(OBJ)
 mutex.o: mutex.c mutex.h 
 	$(CC) -g -Wall $(CFLAGS)  -c mutex.c -o mutex.o
 
-threads.o: threads.c dmessage.o threads.h 
+threads.o: threads.c dmessage.o threads.h debug.h
 	$(CC) -g -Wall $(CFLAGS)  -c threads.c -o threads.o
 
 
