@@ -16,6 +16,7 @@ void thread_recv_monitor(void *arg);
 void thread_move_robot(void *arg);
 void thread_battery_state(void * args);
 void thread_image(void *args);
+void thread_watchdog(void * args);
 void print_status(int status);
 void images(void *args);
 

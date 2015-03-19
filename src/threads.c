@@ -7,6 +7,7 @@
 #define PRIORITY_SEND_MONITOR 25
 #define PRIORITY_BATTERY_STATE 25
 #define PRIORITY_IMAGE 25
+#define PRIORITY_WATCHDOG 5
 
 RT_TASK task_thread_batterie_state;
 RT_TASK task_thread_connect_robot;
@@ -15,6 +16,7 @@ RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
 RT_TASK task_thread_image;
+RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
     &task_thread_send_monitor,
@@ -23,6 +25,7 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_move_robot,
     &task_thread_battery_state,
     &task_thread_image,
+    &task_thread_watchdog,
     NULL
 };
 
@@ -33,6 +36,7 @@ void (*threads_functions_tab[])(void *) = {
     &thread_move_robot,
     &thread_battery_state,
     &thread_image,
+    &thread_watchdog,
     NULL
 };
 
@@ -43,6 +47,7 @@ int threads_priority[] = {
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
     PRIORITY_IMAGE,
+    PRIORITY_WATCHDOG,
     -1
 };
 
@@ -387,6 +392,10 @@ void thread_image(void * args){
     //     }
     // }
 
+}
+
+void thread_watchdog(void * args){
+    rt_printf("thread_watchdog : Started\n");
 }
 
 
