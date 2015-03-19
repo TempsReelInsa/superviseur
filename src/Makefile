@@ -1,7 +1,7 @@
 CC=gcc
 LINK=g++
 CFLAGS=-I../xenomai/include  -I../lib_destijl/headers
-OBJ=threads.o global.o main.o mutex.o
+OBJ=mutex.o msg_queue.o threads.o global.o main.o
 OBJ_SRC=../lib_destijl/source/*.o
 LIB= -lopencv_core -lopencv_highgui -lopencv_imgproc -lxenomai -lnative -L../xenomai/lib
 
@@ -25,6 +25,8 @@ global.o: global.c global.h
 main.o: main.c global.h threads.h
 	$(CC) -g -Wall $(CFLAGS) -c main.c -o main.o
 
+msg_queue.o: msg_queue.c msg_queue.h
+	$(CC) -g -Wall $(CFLAGS) -c msg_queue.c -o msg_queue.o
 
 dmessage.o: ../lib_destijl/source/dmessage.c ../lib_destijl/headers/dmessage.h ../lib_destijl/headers/dtools.h
 	cd ../lib_destijl/source; echo "entering source"; \

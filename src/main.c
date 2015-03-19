@@ -2,6 +2,7 @@
 #include "global.h"
 #include "threads.h"
 #include "mutex.h"
+#include "msg_queue.h"
 
 /**
  * \fn void initStruct(void)
@@ -67,10 +68,11 @@ void initStruct(void) {
     threads_init();
 
     /* Creation des files de messages */
-    if ((err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO))){
-        rt_printf("Error msg queue create: %s\n", strerror(-err));
-        exit(EXIT_FAILURE);
-    }
+    // if ((err = rt_queue_create(&queueMsgGUI, "toto", MSG_QUEUE_SIZE*sizeof(DMessage), MSG_QUEUE_SIZE, Q_FIFO))){
+    //     rt_printf("Error msg queue create: %s\n", strerror(-err));
+    //     exit(EXIT_FAILURE);
+    // }
+    msg_queue_init();
 
     /* Creation des structures globales du projet */
     robot = d_new_robot();
