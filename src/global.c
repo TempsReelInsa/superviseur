@@ -13,8 +13,6 @@ RT_MUTEX mutexBattery;
 
 RT_SEM semConnecterRobot;
 
-RT_QUEUE queueMsgGUI;
-
 int etatCommMoniteur = 0;
 int etatCommRobot = 1;
 DRobot *robot;
@@ -22,5 +20,3 @@ DMovement *move;
 DServer *serveur;
 DBattery *battery;
 DCamera *camera;
-
-int MSG_QUEUE_SIZE = 10;

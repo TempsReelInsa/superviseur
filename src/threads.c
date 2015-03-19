@@ -1,4 +1,5 @@
 #include "threads.h"
+#include "msg_queue.h"
 
 #define PRIORITY_RECV_MONITOR 30
 #define PRIORITY_CONNECT_ROBOT 20
@@ -90,19 +91,17 @@ void threads_stop()
     }
 }
 
-int write_in_queue(RT_QUEUE *msgQueue, void * data, int size);
-
 void thread_send_monitor(void * arg) {
     DMessage *msg;
     int err;
 
     while (1) {
         rt_printf("tenvoyer : Attente d'un message\n");
-        if ((err = rt_queue_read(&queueMsgGUI, &msg, sizeof (DMessage), TM_INFINITE)) >= 0) {
+        if ((err = msg_queue_get(&msg)) >= 0) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
             serveur->send(serveur, msg);
             msg->free(msg);
-            rt_queue_free(&queueMsgGUI, msg);
+            msg_queue_free(msg);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
         }
@@ -138,7 +137,8 @@ void thread_connect_robot(void * arg) {
                 message = d_new_message();
                 message->put_version(message,version_max,version_min);
                 
-                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                if(msg_queue_write(message) < 0)
+                {
                     message->free(message);
                 }
             }
@@ -150,7 +150,8 @@ void thread_connect_robot(void * arg) {
         rt_printf("tconnecter : Envoi message\n");
         message->print(message, 100);
 
-        if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+        if(msg_queue_write(message) < 0)
+        {
             message->free(message);
         }
     }
@@ -284,7 +285,8 @@ void thread_move_robot(void *arg) {
                 message->put_state(message, status);
 
                 rt_printf("tmove : Envoi message\n");
-                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                if(msg_queue_write(message) < 0)
+                {
                     message->free(message);
                 }
                 nbrErreur = 0;
@@ -331,7 +333,8 @@ void thread_battery_state(void * args){
                 mutex_battery_release();
 
                 rt_printf("tbattery_state : Envoi message\n");
-                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                if(msg_queue_write(message) < 0)
+                {
                     message->free(message);
                 }
             }
@@ -375,7 +378,8 @@ void thread_image(void * args){
             {
                 jpeg->compress(jpeg, image);
                 message->put_jpeg_image(message, jpeg);
-                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                if(msg_queue_write(message) < 0)
+                {
                     message->free(message);
                 }
             } else {
@@ -386,20 +390,6 @@ void thread_image(void * args){
 
 }
 
-int write_in_queue(RT_QUEUE *msgQueue, void * data, int size) {
-    void *msg;
-    int err;
-
-    msg = rt_queue_alloc(msgQueue, size);
-    memcpy(msg, &data, size);
-
-    if ((err = rt_queue_send(msgQueue, msg, sizeof (DMessage), Q_NORMAL)) < 0) {
-        rt_printf("Error msg queue send: %s\n", strerror(-err));
-    }
-    
-
-    return err;
-}
 
 void print_status(int status){
     switch(status){

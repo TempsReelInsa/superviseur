@@ -18,9 +18,6 @@ extern RT_MUTEX mutexBattery;
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
 
-/* @descripteurs des files de messages */
-extern RT_QUEUE queueMsgGUI;
-
 /* @variables partagées */
 extern int etatCommMoniteur;
 extern int etatCommRobot;
@@ -29,9 +26,6 @@ extern DRobot *robot;
 extern DMovement *move;
 extern DBattery *battery;
 extern DCamera *camera;
-
-/* @constantes */
-extern int MSG_QUEUE_SIZE;
 
 #endif	/* GLOBAL_H */
 
