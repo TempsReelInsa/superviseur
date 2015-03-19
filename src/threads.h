@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "includes.h"
+#include "mutex.h"
 
 
 void threads_init();
