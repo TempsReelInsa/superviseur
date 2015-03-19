@@ -5,6 +5,7 @@ RT_MUTEX mutexMove;
 RT_MUTEX mutexBattery;
 
 void mutex_init(){
+    int err;
     /* Creation des mutex */
     if ((err = rt_mutex_create(&mutexEtat, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
@@ -20,16 +21,16 @@ void mutex_init(){
     }
 }
 
-void mutex_acquire(RT_MUTEX * mutex){
+void mutex_acquire(RT_MUTEX mutex){
 	if(rt_mutex_acquire(&mutex, TM_INFINITE)!=0){
-		fprintf(stderr,"Error mutex: %s",perror());
+		perror("rt_mutex_acquire");
 		exit(EXIT_FAILURE);
 	}
 }
 
-void mutex_release(RT_MUTEX * mutex){
-	if(rt_mutex_release(&mutex, TM_INFINITE)!=0){
-		fprintf(stderr,"Error mutex: %s",perror());
+void mutex_release(RT_MUTEX mutex){
+	if(rt_mutex_release(&mutex)!=0){
+		perror("rt_mutex_release");
 		exit(EXIT_FAILURE);
 	}
 }

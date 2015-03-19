@@ -1,6 +1,7 @@
 #include "includes.h"
 #include "global.h"
 #include "threads.h"
+#include "mutex.h"
 
 /**
  * \fn void initStruct(void)
