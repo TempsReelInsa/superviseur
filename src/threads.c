@@ -170,18 +170,10 @@ void thread_recv_monitor(void *arg) {
     BEGIN_THREAD();
 
     serveur->open(serveur, "8000");
-    LOG_RECV_MONITOR("Connexion\n");
-
-    mutex_state_acquire();
-    etatCommMoniteur = 0;
-    mutex_state_release();
+    LOG_RECV_MONITOR("Server binded ...  Waiting for connection & messages\n");
 
     while (1) {
-        LOG_RECV_MONITOR("Attente d'un message\n");
-
-        mutex_state_acquire();
-        etatCommMoniteur = 1;
-        mutex_state_release();
+        LOG_RECV_MONITOR("Wait message ...\n");
 
         var1 = serveur->receive(serveur, msg);
         num_msg++;
@@ -211,10 +203,6 @@ void thread_recv_monitor(void *arg) {
         }
         else{
             LOG_RECV_MONITOR("Client disconnected, stopping robot and restarting server\n");
-            
-            mutex_state_acquire();
-            etatCommMoniteur = 0;
-            mutex_state_release();
             
             mutex_robot_acquire();
             move->set(move, DIRECTION_STOP, 0);

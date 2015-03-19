@@ -15,7 +15,6 @@ extern RT_SEM semConnecterRobot;
 extern RT_SEM semLaunchWatchdog;
 
 /* @variables partagées */
-extern int etatCommMoniteur;
 extern int etatCommRobot;
 extern DServer *serveur;
 extern DRobot *robot;

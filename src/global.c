@@ -10,7 +10,6 @@
 RT_SEM semConnecterRobot;
 RT_SEM semLaunchWatchdog;
 
-int etatCommMoniteur = 0;
 int etatCommRobot = 1;
 DRobot *robot;
 DMovement *move;
