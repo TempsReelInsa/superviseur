@@ -231,9 +231,7 @@ void thread_move_robot(void *arg) {
     rt_task_set_periodic(NULL, TM_NOW, 200000000);
 
     while (1) {
-        /* Attente de l'activation périodique */
         rt_task_wait_period(NULL);
-        LOG_MOVE_ROBOT("Activation périodique\n");
 
         mutex_state_acquire();
         status = etatCommRobot;
@@ -241,7 +239,8 @@ void thread_move_robot(void *arg) {
 
         if (status == STATUS_OK) {
             mutex_robot_acquire();
-            switch (move->get_direction(move)) {
+            switch (move->get_direction(move))
+            {
                 case DIRECTION_FORWARD:
                     gauche = MOTEUR_ARRIERE_LENT;
                     droite = MOTEUR_ARRIERE_LENT;
@@ -277,7 +276,8 @@ void thread_move_robot(void *arg) {
                 status = STATUS_OK;
             }
 
-            if (status != STATUS_OK && nbrErreur >= 10) {
+            if (status != STATUS_OK && nbrErreur >= 10)
+            {
                 mutex_state_acquire();
                 etatCommRobot = status;
                 mutex_state_release();
