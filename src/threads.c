@@ -101,7 +101,6 @@ void thread_send_monitor(void * arg) {
             rt_printf("tenvoyer : envoi d'un message au moniteur\n");
             serveur->send(serveur, msg);
             msg->free(msg);
-            msg_queue_free(msg);
         } else {
             rt_printf("Error msg queue write: %s\n", strerror(-err));
         }
@@ -357,36 +356,36 @@ void thread_battery_state(void * args){
 */
 void thread_image(void * args){
 
-    int status;
-    DImage *image = d_new_image();
-    DJpegimage *jpeg = d_new_jpegimage();
-    DMessage *message = d_new_message();
+    // int status;
+    // DImage *image = d_new_image();
+    // DJpegimage *jpeg = d_new_jpegimage();
+    // DMessage *message = d_new_message();
 
-    rt_task_set_periodic(NULL, TM_NOW, 600000000);
+    // rt_task_set_periodic(NULL, TM_NOW, 600000000);
     
-    while (1) {
-        rt_task_wait_period(NULL);
-        rt_printf("tImagesThread : Activation périodique\n");
+    // while (1) {
+    //     rt_task_wait_period(NULL);
+    //     rt_printf("tImagesThread : Activation périodique\n");
 
-        mutex_state_acquire();
-        status = etatCommMoniteur;
-        mutex_state_release();
+    //     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
+    //     status = etatCommMoniteur;
+    //     rt_mutex_release(&mutexEtat);
 
-        if(status == 1)
-        {
-            if(camera->get_frame(camera, image) == 0)
-            {
-                jpeg->compress(jpeg, image);
-                message->put_jpeg_image(message, jpeg);
-                if(msg_queue_write(message) < 0)
-                {
-                    message->free(message);
-                }
-            } else {
-                rt_printf("tImagesThread : impossible de toper l'image....\n");
-            }
-        }
-    }
+    //     if(status == 1)
+    //     {
+    //         if(camera->get_frame(camera, image) == 0)
+    //         {
+    //             jpeg->compress(jpeg, image);
+    //             message->put_jpeg_image(message, jpeg);
+    //             if(msg_queue_write(message) < 0)
+    //             {
+    //                 message->free(message);
+    //             }
+    //         } else {
+    //             rt_printf("tImagesThread : impossible de toper l'image....\n");
+    //         }
+    //     }
+    // }
 
 }
 
