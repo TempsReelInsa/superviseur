@@ -407,9 +407,12 @@ void thread_watchdog(void * args){
         LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
         rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
 
+        mutex_state_acquire();
+        status = etatCommRobot;
+        mutex_state_release();
         LOG_WATCHDOG("thread_watchdog : Started\n");
         rt_task_set_periodic(NULL, TM_NOW, 1000000000);
-        
+
         while(status==STATUS_OK){
             rt_task_wait_period(NULL);
             LOG_WATCHDOG("thread_watchdog : I'm alive\n");
