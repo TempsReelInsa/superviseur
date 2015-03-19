@@ -435,7 +435,8 @@ void thread_watchdog(void * args){
                 message->put_state(message, status);
 
                 rt_printf("tmove : Envoi message\n");
-                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                if(msg_queue_write(message) < 0)
+                {
                     message->free(message);
                 }
                 nbrErreur = 0;

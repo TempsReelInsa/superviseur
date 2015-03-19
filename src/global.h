@@ -10,11 +10,6 @@
 
 #include "includes.h"
 
-/* @descripteurs des mutex */
-extern RT_MUTEX mutexEtat;
-extern RT_MUTEX mutexMove;
-extern RT_MUTEX mutexBattery;
-
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semLaunchWatchdog;

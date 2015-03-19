@@ -7,10 +7,6 @@
 
 #include "global.h"
 
-RT_MUTEX mutexEtat;
-RT_MUTEX mutexMove;
-RT_MUTEX mutexBattery;
-
 RT_SEM semConnecterRobot;
 RT_SEM semLaunchWatchdog;
 
