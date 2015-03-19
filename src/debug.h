@@ -12,8 +12,7 @@
 #define DEBUG_WHAT DBG_ALL & ~DBG_BATTERY_STATE
 
 #define DPRINTF(fmt, ...) \
-	rt_printf("[%s:%d] " fmt, __func__, __LINE__, ## __VA_ARGS__); \
-	rt_printf("%08x", DEBUG_WHAT)
+	rt_printf("[%s:%d] " fmt, __func__, __LINE__, ## __VA_ARGS__)
 
 #define BEGIN_THREAD() DPRINTF("starting thread ! \n")
 
