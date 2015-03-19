@@ -1,5 +1,6 @@
 #include "threads.h"
 #include "msg_queue.h"
+#include "debug.h"
 
 #define PRIORITY_RECV_MONITOR 30
 #define PRIORITY_CONNECT_ROBOT 20
@@ -62,8 +63,6 @@ void threads_init()
         {
             rt_printf("Error task create: %s\n", strerror(-err));
             exit(EXIT_FAILURE);
-        } else {
-            rt_printf("Task %d created ! \n", i);
         }
     }
  
@@ -80,8 +79,6 @@ void threads_start()
         {
             rt_printf("Error task start: %s\n", strerror(-err));
             exit(EXIT_FAILURE);
-        } else {
-            rt_printf("Task %d started !\n", i);
         }
     }
 }
@@ -92,7 +89,6 @@ void threads_stop()
     for(i=0; threads_tasks_tab[i] != NULL; i++)
     {
         rt_task_delete(threads_tasks_tab[i]);
-        rt_printf("Task %d stopped\n", i);
     }
 }
 
@@ -100,14 +96,16 @@ void thread_send_monitor(void * arg) {
     DMessage *msg;
     int err;
 
+    BEGIN_THREAD();
+
     while (1) {
-        rt_printf("tenvoyer : Attente d'un message\n");
+        LOG_SEND_MONITOR("Attente d'un message\n");
         if ((err = msg_queue_get(&msg)) >= 0) {
-            rt_printf("tenvoyer : envoi d'un message au moniteur\n");
+            LOG_SEND_MONITOR("envoi d'un message au moniteur\n");
             serveur->send(serveur, msg);
             msg->free(msg);
         } else {
-            rt_printf("Error msg queue write: %s\n", strerror(-err));
+            LOG_SEND_MONITOR("Error msg queue write: %s\n", strerror(-err));
         }
     }
 }
@@ -117,12 +115,12 @@ void thread_connect_robot(void * arg) {
     int version_min,version_max;
     DMessage *message;
 
-    rt_printf("tconnect : Debut de l'exécution de tconnect\n");
+    BEGIN_THREAD();
 
     while (1) {
-        rt_printf("tconnect : Attente du sémarphore semConnecterRobot\n");
+        LOG_CONNECT_ROBOT("Attente du sémarphore semConnecterRobot\n");
         rt_sem_p(&semConnecterRobot, TM_INFINITE);
-        rt_printf("tconnect : Ouverture de la communication avec le robot\n");
+        LOG_CONNECT_ROBOT("Ouverture de la communication avec le robot\n");
         status = robot->open_device(robot);
 
         mutex_state_acquire();
@@ -132,9 +130,9 @@ void thread_connect_robot(void * arg) {
         if (status == STATUS_OK) {
             status = robot->start(robot);
             if (status == STATUS_OK){
-                rt_printf("********>tconnect : Robot démarrer<**********\n");
-                
-                rt_printf("tconnect : Launch Watchdog\n");
+
+                LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
+                LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
                 rt_sem_v(&semLaunchWatchdog);
 
                 mutex_robot_acquire();
@@ -154,7 +152,7 @@ void thread_connect_robot(void * arg) {
         message = d_new_message();
         message->put_state(message, status);
 
-        rt_printf("tconnecter : Envoi message\n");
+        LOG_CONNECT_ROBOT("Envoi message\n");
         message->print(message, 100);
 
         if(msg_queue_write(message) < 0)
@@ -169,16 +167,17 @@ void thread_recv_monitor(void *arg) {
     int var1 = 1;
     int num_msg = 0;
 
-    rt_printf("tserver : Début de l'exécution de serveur\n");
+    BEGIN_THREAD();
+
     serveur->open(serveur, "8000");
-    rt_printf("tserver : Connexion\n");
+    LOG_RECV_MONITOR("Connexion\n");
 
     mutex_state_acquire();
     etatCommMoniteur = 0;
     mutex_state_release();
 
     while (1) {
-        rt_printf("tserver : Attente d'un message\n");
+        LOG_RECV_MONITOR("Attente d'un message\n");
 
         mutex_state_acquire();
         etatCommMoniteur = 1;
@@ -189,30 +188,29 @@ void thread_recv_monitor(void *arg) {
         if (var1 > 0) {
             switch (msg->get_type(msg)) {
                 case MESSAGE_TYPE_ACTION:
-                    rt_printf("tserver : Le message %d reçu est une action\n",
+                    LOG_RECV_MONITOR("Le message %d reçu est une action\n",
                             num_msg);
                     DAction *action = d_new_action();
                     action->from_message(action, msg);
                     switch (action->get_order(action)) {
                         case ACTION_CONNECT_ROBOT:
-                            rt_printf("tserver : Action connecter robot\n");
+                            LOG_RECV_MONITOR("Action connecter robot\n");
                             rt_sem_v(&semConnecterRobot);
                             break;
                     }
                     break;
                 case MESSAGE_TYPE_MOVEMENT:
-                    rt_printf("tserver : Le message reçu %d est un mouvement\n",
+                    LOG_RECV_MONITOR("Le message reçu %d est un mouvement\n",
                             num_msg);
                     
                     mutex_robot_acquire();
                     move->from_message(move, msg);
-                    move->print(move);
                     mutex_robot_release();
                     break;
             }
         }
         else{
-            rt_printf("Client disconnected, stopping robot and restarting server\n");
+            LOG_RECV_MONITOR("Client disconnected, stopping robot and restarting server\n");
             
             mutex_state_acquire();
             etatCommMoniteur = 0;
@@ -236,13 +234,13 @@ void thread_move_robot(void *arg) {
     unsigned int nbrErreur = 0;
     DMessage *message;
 
-    rt_printf("tmove : Debut de l'éxecution de periodique à 200ms\n");
+    BEGIN_THREAD();
     rt_task_set_periodic(NULL, TM_NOW, 200000000);
 
     while (1) {
         /* Attente de l'activation périodique */
         rt_task_wait_period(NULL);
-        rt_printf("tmove : Activation périodique\n");
+        LOG_MOVE_ROBOT("Activation périodique\n");
 
         mutex_state_acquire();
         status = etatCommRobot;
@@ -292,7 +290,7 @@ void thread_move_robot(void *arg) {
                 message = d_new_message();
                 message->put_state(message, status);
 
-                rt_printf("tmove : Envoi message\n");
+                LOG_MOVE_ROBOT("Envoi message\n");
                 if(msg_queue_write(message) < 0)
                 {
                     message->free(message);
@@ -313,17 +311,17 @@ void thread_battery_state(void * args){
     int nbrErreur = 0;
     DMessage *message;
 
+    BEGIN_THREAD();
     rt_task_set_periodic(NULL, TM_NOW, 250000000);
     
     while (1) {
         rt_task_wait_period(NULL);
-        rt_printf("tBatterieThread : Activation périodique\n");
+        LOG_BATTERY_STATE("Activation périodique\n");
 
         mutex_state_acquire();
         status = etatCommRobot;
         mutex_state_release();
 
-        print_status(status);
         if (status == STATUS_OK) {
             message = d_new_message();    
             
@@ -340,7 +338,7 @@ void thread_battery_state(void * args){
                 message->put_battery_level(message,battery);
                 mutex_battery_release();
 
-                rt_printf("tbattery_state : Envoi message\n");
+                LOG_BATTERY_STATE("Envoi message\n");
                 if(msg_queue_write(message) < 0)
                 {
                     message->free(message);
