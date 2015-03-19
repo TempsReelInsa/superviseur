@@ -128,7 +128,7 @@ void thread_connect_robot(void * arg) {
         mutex_state_release();
 
         if (status == STATUS_OK) {
-            status = robot->start(robot);
+            status = robot->start_insecurely(robot);
             if (status == STATUS_OK){
 
                 LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
@@ -274,6 +274,8 @@ void thread_move_robot(void *arg) {
 
             status = robot->set_motors(robot, gauche, droite);
 
+            print_status(status);
+
             if(status != STATUS_OK)
             {
                 nbrErreur++;
@@ -397,56 +399,56 @@ void thread_image(void * args){
 }
 
 void thread_watchdog(void * args){
-    int status;
-    unsigned int nbrErreur = 0;
-    DMessage *message;
+    // int status;
+    // unsigned int nbrErreur = 0;
+    // DMessage *message;
 
-    BEGIN_THREAD();
+    // BEGIN_THREAD();
 
-    while(1){
-        LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
-        rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
+    // while(1){
+    //     LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
+    //     rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
 
-        mutex_state_acquire();
-        status = etatCommRobot;
-        mutex_state_release();
-        LOG_WATCHDOG("thread_watchdog : Started\n");
-        rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+    //     mutex_state_acquire();
+    //     status = etatCommRobot;
+    //     mutex_state_release();
+    //     LOG_WATCHDOG("thread_watchdog : Started\n");
+    //     rt_task_set_periodic(NULL, TM_NOW, 1000000000);
 
-        while(status==STATUS_OK){
-            rt_task_wait_period(NULL);
-            LOG_WATCHDOG("thread_watchdog : I'm alive\n");
+    //     while(status==STATUS_OK){
+    //         LOG_WATCHDOG("thread_watchdog : I'm alive\n");
 
-            mutex_robot_acquire();
-            status = robot->reload_wdt(robot);
-            mutex_robot_release();
+    //         mutex_robot_acquire();
+    //         status = robot->reload_wdt(robot);
+    //         print_status(status);
+    //         mutex_robot_release();
 
-            if(status != STATUS_OK)
-            {
-                nbrErreur++;
-                status = STATUS_OK;
-            } else {
-                nbrErreur = 0;
-            }
+    //         if(status != STATUS_OK)
+    //         {
+    //             nbrErreur++;
+    //             status = STATUS_OK;
+    //         } else {
+    //             nbrErreur = 0;
+    //         }
 
-            if (status != STATUS_OK && nbrErreur >= 10) {
-                mutex_state_acquire();
-                etatCommRobot = status;
-                mutex_state_release();
+    //         if (status != STATUS_OK && nbrErreur >= 10) {
+    //             mutex_state_acquire();
+    //             etatCommRobot = status;
+    //             mutex_state_release();
 
-                message = d_new_message();
-                message->put_state(message, status);
+    //             message = d_new_message();
+    //             message->put_state(message, status);
 
-                LOG_WATCHDOG("tmove : Envoi message\n");
-                if(msg_queue_write(message) < 0)
-                {
-                    message->free(message);
-                }
-                nbrErreur = 0;
-            }
-
-        }
-    }
+    //             LOG_WATCHDOG("tmove : Envoi message\n");
+    //             if(msg_queue_write(message) < 0)
+    //             {
+    //                 message->free(message);
+    //             }
+    //             nbrErreur = 0;
+    //         }
+    //         rt_task_wait_period(NULL);
+    //     }
+    // }
 }
 
 
@@ -454,31 +456,31 @@ void print_status(int status){
     switch(status){
         default:
         case STATUS_OK: 
-            rt_printf(" ------------> STATUS_OK\n");
+            DPRINTF(" ------------> STATUS_OK\n");
             break;
         case STATUS_ERR_NO_FILE:
-            rt_printf(" ------------> STATUS_ERR_NO_FILE\n");
+            DPRINTF(" ------------> STATUS_ERR_NO_FILE\n");
             break;
         case STATUS_ERR_TIMEOUT: 
-            rt_printf(" ------------> STATUS_ERR_TIMEOUT\n");
+            DPRINTF(" ------------> STATUS_ERR_TIMEOUT\n");
             break;
         case STATUS_ERR_UNKNOWN_CMD: 
-            rt_printf(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
+            DPRINTF(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
             break;
         case STATUS_ERR_INVALID_PARAMS: 
-            rt_printf(" ------------> STATUS_ERR_INVALID_PARAMS\n");
+            DPRINTF(" ------------> STATUS_ERR_INVALID_PARAMS\n");
             break;
         case STATUS_ERR_WDT_EXPIRED: 
-            rt_printf(" ------------> STATUS_ERR_WDT_EXPIRED\n");
+            DPRINTF(" ------------> STATUS_ERR_WDT_EXPIRED\n");
             break;
         case STATUS_ERR_SELECT: 
-            rt_printf(" ------------> STATUS_ERR_SELECT\n");
+            DPRINTF(" ------------> STATUS_ERR_SELECT\n");
             break;
         case STATUS_ERR_UNKNOWN: 
-            rt_printf(" ------------> STATUS_ERR_UNKNOWN\n");
+            DPRINTF(" ------------> STATUS_ERR_UNKNOWN\n");
             break;
         case STATUS_ERR_CHECKSUM: 
-            rt_printf(" ------------> STATUS_ERR_CHECKSUM\n");
+            DPRINTF(" ------------> STATUS_ERR_CHECKSUM\n");
             break;  
     }
 }
