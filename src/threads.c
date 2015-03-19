@@ -401,16 +401,18 @@ void thread_watchdog(void * args){
     unsigned int nbrErreur = 0;
     DMessage *message;
 
+    BEGIN_THREAD();
+
     while(1){
-        rt_printf("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
+        LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
         rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
 
-        rt_printf("thread_watchdog : Started\n");
+        LOG_WATCHDOG("thread_watchdog : Started\n");
         rt_task_set_periodic(NULL, TM_NOW, 1000000000);
         
         while(status==STATUS_OK){
             rt_task_wait_period(NULL);
-            rt_printf("thread_watchdog : I'm alive\n");
+            LOG_WATCHDOG("thread_watchdog : I'm alive\n");
 
             mutex_robot_acquire();
             status = robot->reload_wdt(robot);
@@ -432,7 +434,7 @@ void thread_watchdog(void * args){
                 message = d_new_message();
                 message->put_state(message, status);
 
-                rt_printf("tmove : Envoi message\n");
+                LOG_WATCHDOG("tmove : Envoi message\n");
                 if(msg_queue_write(message) < 0)
                 {
                     message->free(message);

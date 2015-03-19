@@ -9,7 +9,8 @@
 #define DBG_MOVE_ROBOT (1<<3)
 #define DBG_BATTERY_STATE (1<<4)
 #define DBG_IMAGE (1<<5)
-#define DBG_ALL (DBG_SEND_MONITOR | DBG_CONNECT_ROBOT | DBG_RECV_MONITOR | DBG_MOVE_ROBOT | DBG_BATTERY_STATE | DBG_IMAGE)
+#define DBG_WATCHDOG (1<<6)
+#define DBG_ALL (DBG_WATCHDOG | DBG_SEND_MONITOR | DBG_CONNECT_ROBOT | DBG_RECV_MONITOR | DBG_MOVE_ROBOT | DBG_BATTERY_STATE | DBG_IMAGE)
 
 #define DEBUG_WHAT DBG_ALL
 
@@ -52,9 +53,15 @@
 #endif
 
 #if DEBUG_WHAT & DBG_IMAGE
-	#define LOG_IMAGE(fmt, ...) DPRINTF_C(BRIGHT_VIOLET, fmt, ## __VA_ARGS__)
+	#define LOG_IMAGE(fmt, ...) DPRINTF_C(RED, fmt, ## __VA_ARGS__)
 #else
 	#define LOG_IMAGE(fmt, ...)
+#endif
+
+#if DEBUG_WHAT & DBG_WATCHDOG
+	#define LOG_WATCHDOG(fmt, ...) DPRINTF_C(BRIGHT_VIOLET, fmt, ## __VA_ARGS__)
+#else
+	#define LOG_WATCHDOG(fmt, ...)
 #endif
 
 #endif
