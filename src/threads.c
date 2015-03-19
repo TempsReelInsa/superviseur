@@ -130,9 +130,12 @@ void thread_connect_robot(void * arg) {
         mutex_state_release();
 
         if (status == STATUS_OK) {
-            status = robot->start_insecurely(robot);
+            status = robot->start(robot);
             if (status == STATUS_OK){
                 rt_printf("********>tconnect : Robot démarrer<**********\n");
+                
+                rt_printf("tconnect : Launch Watchdog\n");
+                rt_sem_v(&semLaunchWatchdog);
 
                 mutex_robot_acquire();
                 robot->get_version(robot, &version_max, &version_min);
@@ -278,6 +281,7 @@ void thread_move_robot(void *arg) {
                 nbrErreur++;
             } else {
                 nbrErreur = 0;
+                status = STATUS_OK;
             }
 
             if (status != STATUS_OK && nbrErreur >= 10) {
@@ -395,7 +399,50 @@ void thread_image(void * args){
 }
 
 void thread_watchdog(void * args){
-    rt_printf("thread_watchdog : Started\n");
+    int status;
+    unsigned int nbrErreur = 0;
+    DMessage *message;
+
+    while(1){
+        rt_printf("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
+        rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
+
+        rt_printf("thread_watchdog : Started\n");
+        rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+        
+        while(status==STATUS_OK){
+            rt_task_wait_period(NULL);
+            rt_printf("thread_watchdog : I'm alive\n");
+
+            mutex_robot_acquire();
+            status = robot->reload_wdt(robot);
+            mutex_robot_release();
+
+            if(status != STATUS_OK)
+            {
+                nbrErreur++;
+                status = STATUS_OK;
+            } else {
+                nbrErreur = 0;
+            }
+
+            if (status != STATUS_OK && nbrErreur >= 10) {
+                mutex_state_acquire();
+                etatCommRobot = status;
+                mutex_state_release();
+
+                message = d_new_message();
+                message->put_state(message, status);
+
+                rt_printf("tmove : Envoi message\n");
+                if (write_in_queue(&queueMsgGUI, message, sizeof (DMessage)) < 0) {
+                    message->free(message);
+                }
+                nbrErreur = 0;
+            }
+
+        }
+    }
 }
 
 

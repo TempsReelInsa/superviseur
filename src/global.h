@@ -17,6 +17,7 @@ extern RT_MUTEX mutexBattery;
 
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
+extern RT_SEM semLaunchWatchdog;
 
 /* @variables partagées */
 extern int etatCommMoniteur;

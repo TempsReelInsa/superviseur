@@ -12,6 +12,7 @@ RT_MUTEX mutexMove;
 RT_MUTEX mutexBattery;
 
 RT_SEM semConnecterRobot;
+RT_SEM semLaunchWatchdog;
 
 int etatCommMoniteur = 0;
 int etatCommRobot = 1;
