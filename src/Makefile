@@ -1,7 +1,7 @@
 CC=gcc
 LINK=g++
 CFLAGS=-I../xenomai/include  -I../lib_destijl/headers
-OBJ=mutex.o msg_queue.o threads.o global.o main.o
+OBJ=handle_error.o mutex.o msg_queue.o threads.o global.o main.o
 OBJ_SRC=../lib_destijl/source/*.o
 LIB= -lopencv_core -lopencv_highgui -lopencv_imgproc -lxenomai -lnative -L../xenomai/lib
 
@@ -10,6 +10,9 @@ all: main
 
 main: $(OBJ)
 	$(LINK) $(OBJ) $(OBJ_SRC) -o robot $(LIB)
+
+handle_error.o: handle_error.c handle_error.h debug.h
+	$(CC) -g -Wall $(CFLAGS)  -c handle_error.c -o handle_error.o
 
 mutex.o: mutex.c mutex.h 
 	$(CC) -g -Wall $(CFLAGS)  -c mutex.c -o mutex.o

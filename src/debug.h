@@ -10,9 +10,10 @@
 #define DBG_BATTERY_STATE (1<<4)
 #define DBG_IMAGE (1<<5)
 #define DBG_WATCHDOG (1<<6)
-#define DBG_ALL (DBG_WATCHDOG | DBG_SEND_MONITOR | DBG_CONNECT_ROBOT | DBG_RECV_MONITOR | DBG_MOVE_ROBOT | DBG_BATTERY_STATE | DBG_IMAGE)
+#define DBG_STATUS_ERROR (1<<7)
+#define DBG_ALL (DBG_WATCHDOG | DBG_SEND_MONITOR | DBG_CONNECT_ROBOT | DBG_RECV_MONITOR | DBG_MOVE_ROBOT | DBG_BATTERY_STATE | DBG_IMAGE | DBG_STATUS_ERROR)
 
-#define DEBUG_WHAT DBG_ALL
+#define DEBUG_WHAT DBG_ALL & ~DBG_SEND_MONITOR & ~DBG_RECV_MONITOR
 
 #define DPRINTF(fmt, ...) \
 	rt_printf("[%s:%d] " fmt, __func__, __LINE__, ## __VA_ARGS__)
@@ -23,7 +24,7 @@
 #define BEGIN_THREAD() DPRINTF_C(BRIGHT_BLACK, "starting thread ! \n")
 
 #if DEBUG_WHAT & DBG_SEND_MONITOR
-	#define LOG_SEND_MONITOR(fmt, ...) DPRINTF_C(BRIGHT_RED, fmt, ## __VA_ARGS__)
+	#define LOG_SEND_MONITOR(fmt, ...) DPRINTF_C(BLUE, fmt, ## __VA_ARGS__)
 #else
 	#define LOG_SEND_MONITOR(fmt, ...)
 #endif
@@ -53,7 +54,7 @@
 #endif
 
 #if DEBUG_WHAT & DBG_IMAGE
-	#define LOG_IMAGE(fmt, ...) DPRINTF_C(RED, fmt, ## __VA_ARGS__)
+	#define LOG_IMAGE(fmt, ...) DPRINTF_C(YELLOW, fmt, ## __VA_ARGS__)
 #else
 	#define LOG_IMAGE(fmt, ...)
 #endif
@@ -62,6 +63,12 @@
 	#define LOG_WATCHDOG(fmt, ...) DPRINTF_C(BRIGHT_VIOLET, fmt, ## __VA_ARGS__)
 #else
 	#define LOG_WATCHDOG(fmt, ...)
+#endif
+
+#if DEBUG_WHAT & DBG_STATUS_ERROR
+	#define LOG_HANDLE_ERROR(fmt, ...) DPRINTF_C(BLINK_RED_WHITE, fmt, ## __VA_ARGS__)
+#else
+	#define LOG_HANDLE_ERROR(fmt, ...)
 #endif
 
 #endif

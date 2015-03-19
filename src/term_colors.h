@@ -58,6 +58,7 @@
 #define BRIGHT_VIOLET       ESC_FG(ATTR_BRIGHT, FG_VIOLET)
 #define BRIGHT_CYAN         ESC_FG(ATTR_BRIGHT, FG_CYAN)
 #define BRIGHT_WHITE        ESC_FG(ATTR_BRIGHT, FG_WHITE)
+#define BLINK_RED_WHITE		ESC_FG_BG(ATTR_BLINK, FG_WHITE, BG_RED)
 
 /* 
  * Macro for coloring some text. Color must be or a string build with 

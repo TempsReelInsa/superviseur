@@ -122,11 +122,9 @@ void thread_connect_robot(void * arg) {
         LOG_CONNECT_ROBOT("Ouverture de la communication avec le robot\n");
         status = robot->open_device(robot);
 
-        mutex_state_acquire();
-        etatCommRobot = status;
-        mutex_state_release();
+        handle_error_process_hard(status);
 
-        if (status == STATUS_OK) {
+        if (handle_error_check()) {
             status = robot->start_insecurely(robot);
             if (status == STATUS_OK){
 
@@ -224,8 +222,6 @@ void thread_move_robot(void *arg) {
     int status = 1;
     int gauche;
     int droite;
-    unsigned int nbrErreur = 0;
-    DMessage *message;
 
     BEGIN_THREAD();
     rt_task_set_periodic(NULL, TM_NOW, 200000000);
@@ -233,11 +229,7 @@ void thread_move_robot(void *arg) {
     while (1) {
         rt_task_wait_period(NULL);
 
-        mutex_state_acquire();
-        status = etatCommRobot;
-        mutex_state_release();
-
-        if (status == STATUS_OK) {
+        if (handle_error_check()) {
             mutex_robot_acquire();
             switch (move->get_direction(move))
             {
@@ -266,32 +258,7 @@ void thread_move_robot(void *arg) {
 
             status = robot->set_motors(robot, gauche, droite);
 
-            print_status(status);
-
-            if(status != STATUS_OK)
-            {
-                nbrErreur++;
-            } else {
-                nbrErreur = 0;
-                status = STATUS_OK;
-            }
-
-            if (status != STATUS_OK && nbrErreur >= 10)
-            {
-                mutex_state_acquire();
-                etatCommRobot = status;
-                mutex_state_release();
-
-                message = d_new_message();
-                message->put_state(message, status);
-
-                LOG_MOVE_ROBOT("Envoi message\n");
-                if(msg_queue_write(message) < 0)
-                {
-                    message->free(message);
-                }
-                nbrErreur = 0;
-            }
+            handle_error_process(status); 
         }
     }
 }
@@ -303,7 +270,6 @@ void thread_battery_state(void * args){
 
     int status = 1;
     int tmp_battery = -1;
-    int nbrErreur = 0;
     DMessage *message;
 
     BEGIN_THREAD();
@@ -313,20 +279,16 @@ void thread_battery_state(void * args){
         rt_task_wait_period(NULL);
         LOG_BATTERY_STATE("Activation périodique\n");
 
-        mutex_state_acquire();
-        status = etatCommRobot;
-        mutex_state_release();
-
-        if (status == STATUS_OK) {
-            message = d_new_message();    
-            
+        if (handle_error_check()) {
             mutex_robot_acquire();
             status = robot->get_vbat(robot, &tmp_battery);
             mutex_robot_release();
 
-            if(status == STATUS_OK){
-                nbrErreur = 0;
+            handle_error_process(status);
 
+            if (handle_error_check()) {
+                message = d_new_message();    
+                
                 mutex_battery_acquire();
                 if(tmp_battery!=BATTERY_LEVEL_UNKNOWN)
                     battery->set_level(battery,tmp_battery);
@@ -338,15 +300,7 @@ void thread_battery_state(void * args){
                 {
                     message->free(message);
                 }
-            }
-            else if(status != STATUS_OK && nbrErreur<3){
-                nbrErreur++;
-                status = STATUS_OK;
-            }
-            else{
-                mutex_state_acquire();
-                etatCommRobot = status;
-                mutex_state_release();
+
             }
         }
     }
@@ -444,36 +398,3 @@ void thread_watchdog(void * args){
     // }
 }
 
-
-void print_status(int status){
-    switch(status){
-        default:
-        case STATUS_OK: 
-            DPRINTF(" ------------> STATUS_OK\n");
-            break;
-        case STATUS_ERR_NO_FILE:
-            DPRINTF(" ------------> STATUS_ERR_NO_FILE\n");
-            break;
-        case STATUS_ERR_TIMEOUT: 
-            DPRINTF(" ------------> STATUS_ERR_TIMEOUT\n");
-            break;
-        case STATUS_ERR_UNKNOWN_CMD: 
-            DPRINTF(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
-            break;
-        case STATUS_ERR_INVALID_PARAMS: 
-            DPRINTF(" ------------> STATUS_ERR_INVALID_PARAMS\n");
-            break;
-        case STATUS_ERR_WDT_EXPIRED: 
-            DPRINTF(" ------------> STATUS_ERR_WDT_EXPIRED\n");
-            break;
-        case STATUS_ERR_SELECT: 
-            DPRINTF(" ------------> STATUS_ERR_SELECT\n");
-            break;
-        case STATUS_ERR_UNKNOWN: 
-            DPRINTF(" ------------> STATUS_ERR_UNKNOWN\n");
-            break;
-        case STATUS_ERR_CHECKSUM: 
-            DPRINTF(" ------------> STATUS_ERR_CHECKSUM\n");
-            break;  
-    }
-}
