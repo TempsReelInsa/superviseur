@@ -135,7 +135,7 @@ void thread_connect_robot(void * arg) {
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
                 rt_sem_v(&semLaunchWatchdog);
 
-                LOG_HANDLE_ERROR("Broadcast semaphore STATUS_OK\n");
+                LOG_STATUS("Broadcast semaphore STATUS_OK\n");
                 rt_sem_broadcast(&semStatusOk);
 
                 mutex_robot_acquire();

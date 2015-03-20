@@ -7,31 +7,31 @@ void print_status(int status){
     switch(status){
         default:
         case STATUS_OK: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_OK\n");
+            LOG_STATUS(" ------------> STATUS_OK\n");
             break;
         case STATUS_ERR_NO_FILE:
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_NO_FILE\n");
+            LOG_STATUS(" ------------> STATUS_ERR_NO_FILE\n");
             break;
         case STATUS_ERR_TIMEOUT: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_TIMEOUT\n");
+            LOG_STATUS(" ------------> STATUS_ERR_TIMEOUT\n");
             break;
         case STATUS_ERR_UNKNOWN_CMD: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
+            LOG_STATUS(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
             break;
         case STATUS_ERR_INVALID_PARAMS: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_INVALID_PARAMS\n");
+            LOG_STATUS(" ------------> STATUS_ERR_INVALID_PARAMS\n");
             break;
         case STATUS_ERR_WDT_EXPIRED: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_WDT_EXPIRED\n");
+            LOG_STATUS(" ------------> STATUS_ERR_WDT_EXPIRED\n");
             break;
         case STATUS_ERR_SELECT: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_SELECT\n");
+            LOG_STATUS(" ------------> STATUS_ERR_SELECT\n");
             break;
         case STATUS_ERR_UNKNOWN: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_UNKNOWN\n");
+            LOG_STATUS(" ------------> STATUS_ERR_UNKNOWN\n");
             break;
         case STATUS_ERR_CHECKSUM: 
-            LOG_HANDLE_ERROR(" ------------> STATUS_ERR_CHECKSUM\n");
+            LOG_STATUS(" ------------> STATUS_ERR_CHECKSUM\n");
             break;  
     }
 }
@@ -45,7 +45,7 @@ void status_process_hard(int status){
 
 	if(status != STATUS_OK){
         
-        LOG_HANDLE_ERROR("Status error\n");
+        LOG_STATUS("Status error\n");
         print_status(status);
 
         message = d_new_message();
@@ -84,9 +84,9 @@ int status_check(int bloquant){
     mutex_state_release();
 
     if(bloquant && status != STATUS_OK){
-        LOG_HANDLE_ERROR("Wait semaphore STATUS_OK\n");
+        LOG_STATUS("Wait semaphore STATUS_OK\n");
         rt_sem_p(&semStatusOk,TM_INFINITE);
-        LOG_HANDLE_ERROR("STATUS_OK\n");
+        LOG_STATUS("STATUS_OK\n");
     }
 
     return status == STATUS_OK;
