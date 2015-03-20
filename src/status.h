@@ -7,7 +7,7 @@
 #include "mutex.h"
 #include "msg_queue.h"
 
-#define MAX_ERROR 2
+#define MAX_ERROR 7
 
 void status_process(int status);
 void status_process_hard(int status);

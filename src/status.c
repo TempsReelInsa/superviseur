@@ -3,35 +3,35 @@
 int nb_error = 0;
 int etatCommRobot = 1;
 
-void print_status(int status){
+char * print_status(int status){
     switch(status){
         default:
         case STATUS_OK: 
-            LOG_STATUS(" ------------> STATUS_OK\n");
+            return("STATUS_OK");
             break;
         case STATUS_ERR_NO_FILE:
-            LOG_STATUS(" ------------> STATUS_ERR_NO_FILE\n");
+            return("STATUS_ERR_NO_FILE");
             break;
         case STATUS_ERR_TIMEOUT: 
-            LOG_STATUS(" ------------> STATUS_ERR_TIMEOUT\n");
+            return("STATUS_ERR_TIMEOUT");
             break;
         case STATUS_ERR_UNKNOWN_CMD: 
-            LOG_STATUS(" ------------> STATUS_ERR_UNKNOWN_CMD\n");
+            return("STATUS_ERR_UNKNOWN_CMD");
             break;
         case STATUS_ERR_INVALID_PARAMS: 
-            LOG_STATUS(" ------------> STATUS_ERR_INVALID_PARAMS\n");
+            return("STATUS_ERR_INVALID_PARAMS");
             break;
         case STATUS_ERR_WDT_EXPIRED: 
-            LOG_STATUS(" ------------> STATUS_ERR_WDT_EXPIRED\n");
+            return("STATUS_ERR_WDT_EXPIRED");
             break;
         case STATUS_ERR_SELECT: 
-            LOG_STATUS(" ------------> STATUS_ERR_SELECT\n");
+            return("STATUS_ERR_SELECT");
             break;
         case STATUS_ERR_UNKNOWN: 
-            LOG_STATUS(" ------------> STATUS_ERR_UNKNOWN\n");
+            return("STATUS_ERR_UNKNOWN");
             break;
         case STATUS_ERR_CHECKSUM: 
-            LOG_STATUS(" ------------> STATUS_ERR_CHECKSUM\n");
+            return("STATUS_ERR_CHECKSUM");
             break;  
     }
 }
@@ -41,12 +41,10 @@ void status_process_hard(int status){
 
     mutex_state_acquire();
     etatCommRobot = status;
-    mutex_state_release();
 
 	if(status != STATUS_OK){
         
-        LOG_STATUS("Status error\n");
-        print_status(status);
+        LOG_STATUS("%s\n",print_status(status));
 
         message = d_new_message();
         message->put_state(message, status);
@@ -58,22 +56,27 @@ void status_process_hard(int status){
         }
 	}
     else{
-        mutex_state_acquire();
         nb_error = 0;
-        mutex_state_release();
+
+        if(rt_sem_broadcast(&semStatusOk)!=0){
+            perror("rt_sem_broadcast");
+            exit(EXIT_FAILURE);
+        }
     }
+    mutex_state_release();
 }
 void status_process(int status){
     DMessage *message;
 
-	if(nb_error > MAX_ERROR){
+	if(nb_error > MAX_ERROR || status == STATUS_OK){
         status_process_hard(status);
 	}
 	else {
         mutex_state_acquire();
 		nb_error++;
-        mutex_state_release();
-	}
+        LOG_STATUS("++Nb error(%d)\n",nb_error);
+        mutex_state_release();	
+    }
 }
 
 int status_check(int bloquant){
@@ -85,11 +88,11 @@ int status_check(int bloquant){
 
     if(bloquant && status != STATUS_OK){
         LOG_STATUS("Wait semaphore STATUS_OK\n");
-        rt_sem_p(&semStatusOk,TM_INFINITE);
-        LOG_STATUS("STATUS_OK\n");
+        if(rt_sem_p(&semStatusOk,TM_INFINITE)!=0){
+            perror("rt_sem_p");
+            exit(EXIT_FAILURE);
+        }
     }
 
     return status == STATUS_OK;
 }
-
-
