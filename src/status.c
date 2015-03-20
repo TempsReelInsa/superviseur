@@ -67,7 +67,7 @@ void status_process_hard(int status){
 }
 void status_process(int status){
     DMessage *message;
-
+    LOG_STATUS("--> %s\n",print_status(status));
 	if(nb_error > MAX_ERROR || status == STATUS_OK){
         status_process_hard(status);
 	}

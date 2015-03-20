@@ -351,55 +351,41 @@ void thread_image(void * args){
 }
 
 void thread_watchdog(void * args){
-    // int status;
-    // unsigned int nbrErreur = 0;
-    // DMessage *message;
+    int status;
+    unsigned int nbrErreur = 0;
+    DMessage *message;
 
-    // BEGIN_THREAD();
+    BEGIN_THREAD();
 
-    // while(1){
-    //     LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
-    //     rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
+    while(1){
+        LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
+        rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
 
-    //     mutex_state_acquire();
-    //     status = etatCommRobot;
-    //     mutex_state_release();
-    //     LOG_WATCHDOG("thread_watchdog : Started\n");
-    //     rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+        LOG_WATCHDOG("thread_watchdog : Started\n");
+        rt_task_set_periodic(NULL, TM_NOW, 1000000000);
 
-    //     while(status==STATUS_OK){
-    //         LOG_WATCHDOG("thread_watchdog : I'm alive\n");
+        while(status_check(1)){
+            rt_task_wait_period(NULL);
 
-    //         mutex_robot_acquire();
-    //         status = robot->reload_wdt(robot);
-    //         print_status(status);
-    //         mutex_robot_release();
+            LOG_WATCHDOG("thread_watchdog : I'm alive\n");
 
-    //         if(status != STATUS_OK)
-    //         {
-    //             nbrErreur++;
-    //             status = STATUS_OK;
-    //         } else {
-    //             nbrErreur = 0;
-    //         }
+            mutex_robot_acquire();
+            status = robot->reload_wdt(robot);
+            mutex_robot_release();
 
-    //         if (status != STATUS_OK && nbrErreur >= 10) {
-    //             mutex_state_acquire();
-    //             etatCommRobot = status;
-    //             mutex_state_release();
+            status_process(status); 
 
-    //             message = d_new_message();
-    //             message->put_state(message, status);
+            if (status_check(0)) {
+                message = d_new_message();
+                message->put_state(message, status);
 
-    //             LOG_WATCHDOG("tmove : Envoi message\n");
-    //             if(msg_queue_write(message) < 0)
-    //             {
-    //                 message->free(message);
-    //             }
-    //             nbrErreur = 0;
-    //         }
-    //         rt_task_wait_period(NULL);
-    //     }
-    // }
+                LOG_WATCHDOG("Envoi message\n");
+                if(msg_queue_write(message) < 0)
+                {
+                    message->free(message);
+                }
+            }
+        }
+    }
 }
 
