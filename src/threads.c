@@ -120,13 +120,15 @@ void thread_connect_robot(void * arg) {
         LOG_CONNECT_ROBOT("Attente du sémarphore semConnecterRobot\n");
         rt_sem_p(&semConnecterRobot, TM_INFINITE);
         LOG_CONNECT_ROBOT("Ouverture de la communication avec le robot\n");
+
+        mutex_robot_acquire();  
         status = robot->open_device(robot);
 
         status_process_hard(status);
 
         if (status_check(0)) {
             status = robot->start_insecurely(robot);
-            
+            DPRINTF("-------> status = %d\n",status);
             status_process_hard(status);
             
             if (status_check(0)){
@@ -135,9 +137,7 @@ void thread_connect_robot(void * arg) {
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
                 rt_sem_v(&semLaunchWatchdog);
                 
-                mutex_robot_acquire();
                 robot->get_version(robot, &version_max, &version_min);
-                mutex_robot_release();
 
                 message = d_new_message();
                 message->put_version(message,version_max,version_min);
@@ -148,6 +148,8 @@ void thread_connect_robot(void * arg) {
                 }
             }
         }
+        
+        mutex_robot_release();
 
         message = d_new_message();
         message->put_state(message, status);
