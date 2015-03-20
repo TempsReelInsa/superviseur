@@ -9,8 +9,8 @@
 
 RT_SEM semConnecterRobot;
 RT_SEM semLaunchWatchdog;
+RT_SEM semStatusOk;
 
-int etatCommRobot = 1;
 DRobot *robot;
 DMovement *move;
 DServer *serveur;

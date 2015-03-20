@@ -13,9 +13,9 @@
 /* @descripteurs des sempahore */
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semLaunchWatchdog;
+extern RT_SEM semStatusOk;
 
 /* @variables partagées */
-extern int etatCommRobot;
 extern DServer *serveur;
 extern DRobot *robot;
 extern DMovement *move;
