@@ -1,6 +1,7 @@
-#include "handle_error.h"
+#include "status.h"
 
 int nb_error = 0;
+int etatCommRobot = 1;
 
 void print_status(int status){
     switch(status){
@@ -35,14 +36,12 @@ void print_status(int status){
     }
 }
 
-void handle_error_process_hard(int status){
+void status_process_hard(int status){
     DMessage *message;
 
     mutex_state_acquire();
     etatCommRobot = status;
     mutex_state_release();
-
-    nb_error = 0;
 
 	if(status != STATUS_OK){
         
@@ -58,24 +57,37 @@ void handle_error_process_hard(int status){
             message->free(message);
         }
 	}
+    else{
+        mutex_state_acquire();
+        nb_error = 0;
+        mutex_state_release();
+    }
 }
-void handle_error_process(int status){
+void status_process(int status){
     DMessage *message;
 
 	if(nb_error > MAX_ERROR){
-        handle_error_process_hard(status);
+        status_process_hard(status);
 	}
 	else {
+        mutex_state_acquire();
 		nb_error++;
+        mutex_state_release();
 	}
 }
 
-int handle_error_check(){
+int status_check(int bloquant){
 	int status;
 
 	mutex_state_acquire();
     status = etatCommRobot;
     mutex_state_release();
+
+    if(bloquant && status != STATUS_OK){
+        LOG_HANDLE_ERROR("Wait semaphore STATUS_OK\n");
+        rt_sem_p(&semStatusOk,TM_INFINITE);
+        LOG_HANDLE_ERROR("STATUS_OK\n");
+    }
 
     return status == STATUS_OK;
 }

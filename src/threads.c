@@ -122,15 +122,18 @@ void thread_connect_robot(void * arg) {
         LOG_CONNECT_ROBOT("Ouverture de la communication avec le robot\n");
         status = robot->open_device(robot);
 
-        handle_error_process_hard(status);
+        status_process_hard(status);
 
-        if (handle_error_check()) {
+        if (status_check(0)) {
             status = robot->start_insecurely(robot);
             if (status == STATUS_OK){
 
                 LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
                 rt_sem_v(&semLaunchWatchdog);
+
+                LOG_HANDLE_ERROR("Broadcast semaphore STATUS_OK\n");
+                rt_sem_broadcast(&semStatusOk);
 
                 mutex_robot_acquire();
                 robot->get_version(robot, &version_max, &version_min);
@@ -229,7 +232,7 @@ void thread_move_robot(void *arg) {
     while (1) {
         rt_task_wait_period(NULL);
 
-        if (handle_error_check()) {
+        if (status_check(1)) {
             mutex_robot_acquire();
             switch (move->get_direction(move))
             {
@@ -258,7 +261,7 @@ void thread_move_robot(void *arg) {
 
             status = robot->set_motors(robot, gauche, droite);
 
-            handle_error_process(status); 
+            status_process(status); 
         }
     }
 }
@@ -279,14 +282,14 @@ void thread_battery_state(void * args){
         rt_task_wait_period(NULL);
         LOG_BATTERY_STATE("Activation périodique\n");
 
-        if (handle_error_check()) {
+        if (status_check(1)) {
             mutex_robot_acquire();
             status = robot->get_vbat(robot, &tmp_battery);
             mutex_robot_release();
 
-            handle_error_process(status);
+            status_process(status);
 
-            if (handle_error_check()) {
+            if (status_check(0)) {
                 message = d_new_message();    
                 
                 mutex_battery_acquire();
