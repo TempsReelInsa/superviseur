@@ -126,7 +126,10 @@ void thread_connect_robot(void * arg) {
 
         if (status_check(0)) {
             status = robot->start_insecurely(robot);
-            if (status == STATUS_OK){
+            
+            status_process_hard(status);
+            
+            if (status_check(0)){
 
                 LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
