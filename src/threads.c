@@ -1,6 +1,9 @@
 #include "threads.h"
 #include "msg_queue.h"
 #include "debug.h"
+#include "mutex.h"
+#include "status.h"
+#include "utils.h"
 
 #define PRIORITY_RECV_MONITOR 30
 #define PRIORITY_CONNECT_ROBOT 20
@@ -99,7 +102,7 @@ void thread_send_monitor(void * arg) {
     BEGIN_THREAD();
 
     while (1) {
-        if ((err = msg_queue_get(&msg)) >= 0) {
+        if ((err = msg_queue_get(&msg)) >= 0 && serveur->is_active(serveur)) {
             LOG_SEND_MONITOR("Sending message to monitor ... \n");
             serveur->send(serveur, msg);
             msg->free(msg);
@@ -172,8 +175,8 @@ void thread_recv_monitor(void *arg) {
 
     BEGIN_THREAD();
 
+    LOG_RECV_MONITOR("Binding server ...\n");
     serveur->open(serveur, "8000");
-    LOG_RECV_MONITOR("Server binded ...  Waiting for connection & messages\n");
 
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
@@ -208,17 +211,8 @@ void thread_recv_monitor(void *arg) {
         }
         else
         {
-            /*
-            TODO: restart everyshit
-            */
-            LOG_RECV_MONITOR("Client disconnected, stopping robot and restarting server\n");
-            
-            mutex_robot_acquire();
-            move->set(move, DIRECTION_STOP, 0);
-            mutex_robot_release();
-            
-            serveur->close(serveur);
-            serveur->open(serveur, "8000");
+            LOG_RECV_MONITOR("Client disconnected, restart all\n");
+            restart_all();
         }
     }
 }

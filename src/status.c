@@ -3,6 +3,23 @@
 int nb_error = 0;
 int etatCommRobot = 1;
 
+void set_status_robot(int s)
+{
+    mutex_state_acquire();
+    etatCommRobot = s;
+    mutex_state_release();
+}
+
+int get_status_robot()
+{
+    int ret;
+    mutex_state_acquire();
+    ret = etatCommRobot;
+    mutex_state_release();
+    return ret;
+}
+
+
 char * print_status(int status){
     switch(status){
         default:
@@ -66,7 +83,6 @@ void status_process_hard(int status){
     mutex_state_release();
 }
 void status_process(int status){
-    DMessage *message;
 
 	if(nb_error > MAX_ERROR || status == STATUS_OK){
         status_process_hard(status);
