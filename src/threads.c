@@ -17,7 +17,7 @@ RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
 RT_TASK task_thread_image;
-RT_TASK task_thread_watchdog;
+// RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
     &task_thread_send_monitor,
@@ -26,7 +26,7 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_move_robot,
     &task_thread_battery_state,
     &task_thread_image,
-    &task_thread_watchdog,
+    // &task_thread_watchdog,
     NULL
 };
 
@@ -37,7 +37,7 @@ void (*threads_functions_tab[])(void *) = {
     &thread_move_robot,
     &thread_battery_state,
     &thread_image,
-    &thread_watchdog,
+    // &thread_watchdog,
     NULL
 };
 
@@ -48,7 +48,7 @@ int threads_priority[] = {
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
     PRIORITY_IMAGE,
-    PRIORITY_WATCHDOG,
+    // PRIORITY_WATCHDOG,
     -1
 };
 

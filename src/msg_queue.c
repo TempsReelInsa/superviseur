@@ -25,7 +25,7 @@ int msg_queue_write(DMessage *message)
     d_message_init(qmsg);
     qmsg->dataType = message->get_type(message);
     qmsg->len = message->get_lenght(message);
-    qmsg->data = rt_queue_alloc(&msg_queue, message->get_lenght(message));
+    qmsg->data = malloc(message->get_lenght(message));
 
     if(qmsg->data == NULL)
     {
@@ -34,7 +34,7 @@ int msg_queue_write(DMessage *message)
 
     memcpy(qmsg->data, message->get_data(message), qmsg->get_lenght(qmsg));
 
-    if ((err = rt_queue_write(&msg_queue, qmsg, sizeof (DMessage), Q_NORMAL)) < 0) {
+    if ((err = rt_queue_send(&msg_queue, qmsg, sizeof(DMessage), Q_NORMAL)) < 0) {
         rt_printf("Error msg queue send: %s\n", strerror(-err));
     }
 
@@ -52,14 +52,15 @@ int msg_queue_get(DMessage **data)
         (*data)->len = qmsg->get_lenght(qmsg);
         (*data)->data = malloc(qmsg->get_lenght(qmsg));
         memcpy((*data)->data, qmsg->get_data(qmsg), qmsg->get_lenght(qmsg));
-        msg_queue_free(qmsg);
-    }
 
+        msg_queue_free(qmsg);
+
+    }
     return err;
 }
 
 void msg_queue_free(DMessage *data)
 {
-	rt_queue_free(&msg_queue, data->data);
+    free(data->data);
 	rt_queue_free(&msg_queue, data);
 }
