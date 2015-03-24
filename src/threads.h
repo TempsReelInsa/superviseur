@@ -16,6 +16,12 @@ void thread_battery_state(void * args);
 void thread_image_normal(void *args);
 void thread_image_compute(void *args);
 void thread_watchdog(void * args);
+<<<<<<< HEAD
+=======
+void thread_mission(void * args);
+void print_status(int status);
+void images(void *args);
+>>>>>>> Init mission thread
 
 #endif
 

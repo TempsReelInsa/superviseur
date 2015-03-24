@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "image_status.h"
 
+<<<<<<< HEAD
 #define PRIORITY_RECV_MONITOR 80
 #define PRIORITY_CONNECT_ROBOT 70
 #define PRIORITY_MOVE_ROBOT 30
@@ -13,6 +14,16 @@
 #define PRIORITY_BATTERY_STATE 10
 #define PRIORITY_IMAGE_NORMAL 20
 #define PRIORITY_WATCHDOG 95
+=======
+#define PRIORITY_RECV_MONITOR 30
+#define PRIORITY_CONNECT_ROBOT 20
+#define PRIORITY_MOVE_ROBOT 10
+#define PRIORITY_SEND_MONITOR 25
+#define PRIORITY_BATTERY_STATE 25
+#define PRIORITY_IMAGE 25
+#define PRIORITY_WATCHDOG 5
+#define PRIORITY_MISSION 25
+>>>>>>> Init mission thread
 
 RT_TASK task_thread_batterie_state;
 RT_TASK task_thread_connect_robot;
@@ -20,7 +31,12 @@ RT_TASK task_thread_recv_monitor;
 RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
+<<<<<<< HEAD
 RT_TASK task_thread_image_normal;
+=======
+RT_TASK task_thread_image;
+RT_TASK task_thread_mission;
+>>>>>>> Init mission thread
 // RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
@@ -29,7 +45,12 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_recv_monitor,
     &task_thread_move_robot,
     &task_thread_battery_state,
+<<<<<<< HEAD
     &task_thread_image_normal,
+=======
+    &task_thread_image,
+    &task_thread_mission,
+>>>>>>> Init mission thread
     // &task_thread_watchdog,
     NULL
 };
@@ -40,7 +61,12 @@ void (*threads_functions_tab[])(void *) = {
     &thread_recv_monitor,
     &thread_move_robot,
     &thread_battery_state,
+<<<<<<< HEAD
     &thread_image_normal,
+=======
+    &thread_image,
+    &thread_mission,
+>>>>>>> Init mission thread
     // &thread_watchdog,
     NULL
 };
@@ -51,7 +77,12 @@ int threads_priority[] = {
     PRIORITY_RECV_MONITOR,
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
+<<<<<<< HEAD
     PRIORITY_IMAGE_NORMAL,
+=======
+    PRIORITY_IMAGE,
+    PRIORITY_MISSION,
+>>>>>>> Init mission thread
     // PRIORITY_WATCHDOG,
     -1
 };
@@ -480,5 +511,10 @@ void thread_watchdog(void * args){
             }
         }
     }
+}
+
+void thread_mission(void * args){
+    BEGIN_THREAD();
+    
 }
 
