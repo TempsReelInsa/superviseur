@@ -489,8 +489,18 @@ void thread_watchdog(void * args){
 
 void thread_mission(void * args){
     BEGIN_THREAD();
-    
+    DPosition pos;
     while(1){
+        DPRINTF("Wait semaphore MISSION_OK\n");
+        if(rt_sem_p(&semMissionOk,TM_INFINITE)!=0){
+            perror("rt_sem_p");
+            exit(EXIT_FAILURE);
+        }
+
+        mutex_mission_acquire();
+        mission->get_position(mission, &pos);
+        mutex_mission_release();
+
 
     }
 }

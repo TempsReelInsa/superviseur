@@ -16,6 +16,8 @@ extern RT_SEM semLaunchWatchdog;
 extern RT_SEM semStatusOk;
 extern RT_SEM semMonitorStatusUpdated;
 extern RT_SEM semDetectArena;
+extern RT_SEM semMonitorStatusOk;
+extern RT_SEM semMissionOk;
 
 /* @variables partagées */
 extern DServer *serveur;
@@ -24,6 +26,7 @@ extern DMovement *move;
 extern DBattery *battery;
 extern DCamera *camera;
 extern DArena *arena;
+extern DMission *mission;
 
 #endif	/* GLOBAL_H */
 
