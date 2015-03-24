@@ -10,6 +10,7 @@
 RT_SEM semConnecterRobot;
 RT_SEM semLaunchWatchdog;
 RT_SEM semStatusOk;
+RT_SEM semMonitorStatusOk;
 
 DRobot *robot;
 DMovement *move;
