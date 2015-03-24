@@ -41,6 +41,9 @@ int monitor_status_check()
             perror("rt_sem_p");
             exit(EXIT_FAILURE);
         }
+
+        status = monitor_status_get();
+
     }
 
     return status == STATUS_OK;
