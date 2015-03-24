@@ -4,6 +4,7 @@
 #include "mutex.h"
 #include "status.h"
 #include "utils.h"
+#include "monitor_status.h"
 
 #define PRIORITY_RECV_MONITOR 30
 #define PRIORITY_CONNECT_ROBOT 20
@@ -177,6 +178,7 @@ void thread_recv_monitor(void *arg) {
 
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
+        monitor_status_set(MONITOR_STATUS_OK);
 
         size = serveur->receive(serveur, msg);
         num_msg++;
@@ -184,6 +186,7 @@ void thread_recv_monitor(void *arg) {
         if (size > 0)
         {
             LOG_RECV_MONITOR("Message #%d\n", num_msg);
+
             switch (msg->get_type(msg))
             {
                 case MESSAGE_TYPE_ACTION:
@@ -306,38 +309,46 @@ void thread_battery_state(void * args){
 * Periodic thread 600ms
 * Send images to client if connected
 */
-void thread_image(void * args){
+void thread_image(void * args)
+{
+    DImage *image;
+    DJpegimage *jpeg;
+    DMessage *message;
 
-    // int status;
-    // DImage *image = d_new_image();
-    // DJpegimage *jpeg = d_new_jpegimage();
-    // DMessage *message = d_new_message();
-
-    // rt_task_set_periodic(NULL, TM_NOW, 600000000);
+    rt_task_set_periodic(NULL, TM_NOW, 600000000);
     
-    // while (1) {
-    //     rt_task_wait_period(NULL);
-    //     rt_printf("tImagesThread : Activation périodique\n");
+    while (1) {
+        rt_task_wait_period(NULL);
+        LOG_IMAGE("Activation périodique\n");
 
-    //     rt_mutex_acquire(&mutexEtat, TM_INFINITE);
-    //     status = etatCommMoniteur;
-    //     rt_mutex_release(&mutexEtat);
+        if(monitor_status_check()) // se lance 
+        {
 
-    //     if(status == 1)
-    //     {
-    //         if(camera->get_frame(camera, image) == 0)
-    //         {
-    //             jpeg->compress(jpeg, image);
-    //             message->put_jpeg_image(message, jpeg);
-    //             if(msg_queue_write(message) < 0)
-    //             {
-    //                 message->free(message);
-    //             }
-    //         } else {
-    //             rt_printf("tImagesThread : impossible de toper l'image....\n");
-    //         }
-    //     }
-    // }
+            image = d_new_image();
+            if(image != NULL && camera->get_frame(camera, image) == 0)
+            {
+
+                jpeg = d_new_jpegimage();
+                if(jpeg != NULL)
+                {
+                    jpeg->compress(jpeg, image);
+                    message = d_new_message();
+                    message->put_jpeg_image(message, jpeg);
+
+                    LOG_IMAGE("Send image\n");
+                    msg_queue_write(message);
+                    message->free(message);
+                    jpeg->free(jpeg);
+                    image->free(image);
+                } else {
+                    LOG_IMAGE("problem while compressing\n");
+                    image->free(image);
+                }
+            } else {
+                LOG_IMAGE("Problem while get_frame\n");
+            }
+        }
+    }
 
 }
 

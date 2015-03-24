@@ -1,7 +1,7 @@
 CC=gcc
 LINK=g++
 CFLAGS=-I../xenomai/include  -I../lib_destijl/headers
-OBJ=utils.o status.o mutex.o msg_queue.o threads.o global.o main.o
+OBJ=monitor_status.o utils.o status.o mutex.o msg_queue.o threads.o global.o main.o
 OBJ_SRC=../lib_destijl/source/*.o
 LIB= -lopencv_core -lopencv_highgui -lopencv_imgproc -lxenomai -lnative -L../xenomai/lib
 
@@ -13,6 +13,9 @@ main: $(OBJ)
 
 status.o: status.c status.h debug.h
 	$(CC) -g -Wall $(CFLAGS)  -c status.c -o status.o
+
+monitor_status.o: monitor_status.c monitor_status.h debug.h
+	$(CC) -g -Wall $(CFLAGS)  -c monitor_status.c -o monitor_status.o
 
 mutex.o: mutex.c mutex.h 
 	$(CC) -g -Wall $(CFLAGS)  -c mutex.c -o mutex.o

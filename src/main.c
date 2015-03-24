@@ -3,6 +3,7 @@
 #include "threads.h"
 #include "mutex.h"
 #include "msg_queue.h"
+#include "debug.h"
 
 /**
  * \fn void initStruct(void)
@@ -74,6 +75,11 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
 
+    if ((err = rt_sem_create(&semMonitorStatusOk, NULL, 0, S_FIFO))) {
+        rt_printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
     /* Creation des taches */
     threads_init();
 
@@ -90,4 +96,10 @@ void initStruct(void) {
     serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
+
+    if(camera->open(camera))
+    {
+        DPRINTF("unable to open camera");
+        exit(EXIT_FAILURE);
+    }
 }

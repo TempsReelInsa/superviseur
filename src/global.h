@@ -14,6 +14,7 @@
 extern RT_SEM semConnecterRobot;
 extern RT_SEM semLaunchWatchdog;
 extern RT_SEM semStatusOk;
+extern RT_SEM semMonitorStatusOk;
 
 /* @variables partagées */
 extern DServer *serveur;

@@ -3,6 +3,7 @@
 RT_MUTEX mutexEtat;
 RT_MUTEX mutexMove;
 RT_MUTEX mutexBattery;
+RT_MUTEX mutexMonitorStatus;
 
 void mutex_init(){
     int err;
@@ -16,6 +17,10 @@ void mutex_init(){
         exit(EXIT_FAILURE);
     }
     if ((err = rt_mutex_create(&mutexBattery, NULL))) {
+        rt_printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if ((err = rt_mutex_create(&mutexMonitorStatus, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -57,4 +62,12 @@ void mutex_battery_acquire(){
 
 void mutex_battery_release(){
 	mutex_release(mutexBattery);
+}
+
+void mutex_monitor_status_acquire(){
+	mutex_acquire(mutexMonitorStatus);
+}
+
+void mutex_monitor_status_release(){
+	mutex_release(mutexMonitorStatus);
 }
