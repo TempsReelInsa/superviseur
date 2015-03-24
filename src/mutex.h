@@ -21,4 +21,7 @@ void mutex_image_status_release();
 void mutex_arena_acquire();
 void mutex_arena_release();
 
+void mutex_mission_acquire();
+void mutex_mission_release();
+
 #endif	/* MUTEX_H */
