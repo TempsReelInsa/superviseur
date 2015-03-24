@@ -3,6 +3,8 @@
 #include "debug.h"
 
 int image_status = IMAGE_STATUS_NO;
+int image_detect_area = IMAGE_FIND_ARENA_NO;
+int image_compute_position = 0;
 
 void image_status_set(int v)
 {
@@ -47,3 +49,30 @@ int image_status_wait_for(int v)
 	return status == v;
 }
 
+int image_is_compute_position(){
+	int ret;
+	mutex_image_status_acquire();
+	ret = image_compute_position;
+	mutex_image_status_release();
+	return ret;
+}
+
+void image_set_compute_position(int ret){
+	mutex_image_status_acquire();
+	image_compute_position = ret;
+	mutex_image_status_release();
+}
+
+int image_get_detect_area(){
+	int ret;
+	mutex_image_status_acquire();
+	ret = image_detect_area;
+	mutex_image_status_release();
+	return ret;
+}
+
+void image_set_detect_area(int ret){
+	mutex_image_status_acquire();
+	image_detect_area = ret;
+	mutex_image_status_release();
+}
