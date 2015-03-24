@@ -108,6 +108,11 @@ int status_check(int bloquant){
             perror("rt_sem_p");
             exit(EXIT_FAILURE);
         }
+
+        // Update status after release sem
+        mutex_state_acquire();
+        status = etatCommRobot;
+        mutex_state_release();
     }
 
     return status == STATUS_OK;

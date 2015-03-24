@@ -127,14 +127,10 @@ void thread_connect_robot(void * arg) {
         mutex_robot_acquire();  
         status = robot->open_device(robot);
 
-        status_process_hard(status);
-
-        if (status_check(0)) {
+        if (status == STATUS_OK) {
             status = robot->start_insecurely(robot);
-            DPRINTF("-------> status = %d\n",status);
-            status_process_hard(status);
             
-            if (status_check(0)){
+            if (status == STATUS_OK){
 
                 LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
@@ -150,6 +146,7 @@ void thread_connect_robot(void * arg) {
                     message->free(message);
                 }
             }
+            status_process_hard(status);
         }
         
         mutex_robot_release();
