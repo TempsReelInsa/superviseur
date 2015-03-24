@@ -312,12 +312,11 @@ void thread_battery_state(void * args){
 * Periodic thread 600ms
 * Send images to client if connected
 */
-void thread_image(void * args){
-
-    int status;
-    DImage *image = d_new_image();
-    DJpegimage *jpeg = d_new_jpegimage();
-    DMessage *message = d_new_message();
+void thread_image(void * args)
+{
+    DImage *image;
+    DJpegimage *jpeg;
+    DMessage *message;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
     
@@ -325,20 +324,32 @@ void thread_image(void * args){
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
 
-        if(monitor_status_check())
+        if(monitor_status_check()) // se lance 
         {
-            LOG_IMAGE("donne une image\n");
-            // if(camera->get_frame(camera, image) == 0)
-            // {
-            //     jpeg->compress(jpeg, image);
-            //     message->put_jpeg_image(message, jpeg);
-            //     if(msg_queue_write(message) < 0)
-            //     {
-            //         message->free(message);
-            //     }
-            // } else {
-            //     rt_printf("tImagesThread : impossible de toper l'image....\n");
-            // }
+
+            image = d_new_image();
+            if(image != NULL && camera->get_frame(camera, image) == 0)
+            {
+
+                jpeg = d_new_jpegimage();
+                if(jpeg != NULL)
+                {
+                    jpeg->compress(jpeg, image);
+                    message = d_new_message();
+                    message->put_jpeg_image(message, jpeg);
+
+                    LOG_IMAGE("Send image\n");
+                    msg_queue_write(message);
+                    message->free(message);
+                    jpeg->free(jpeg);
+                    image->free(image);
+                } else {
+                    LOG_IMAGE("problem while compressing\n");
+                    image->free(image);
+                }
+            } else {
+                LOG_IMAGE("Problem while get_frame\n");
+            }
         }
     }
 

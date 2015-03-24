@@ -46,6 +46,6 @@ int monitor_status_check()
 
     }
 
-    return status == STATUS_OK;
+    return status == MONITOR_STATUS_OK;
 }
 

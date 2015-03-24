@@ -3,6 +3,7 @@
 #include "threads.h"
 #include "mutex.h"
 #include "msg_queue.h"
+#include "debug.h"
 
 /**
  * \fn void initStruct(void)
@@ -95,4 +96,10 @@ void initStruct(void) {
     serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
+
+    if(camera->open(camera))
+    {
+        DPRINTF("unable to open camera");
+        exit(EXIT_FAILURE);
+    }
 }
