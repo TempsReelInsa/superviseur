@@ -15,6 +15,6 @@ void mutex_state_release();
 void mutex_battery_acquire();
 void mutex_battery_release();
 
-void mutex_monitor_status_acquire();
-void mutex_monitor_status_release();
+void mutex_image_status_acquire();
+void mutex_image_status_release();
 #endif	/* MUTEX_H */
