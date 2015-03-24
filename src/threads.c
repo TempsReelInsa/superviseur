@@ -4,14 +4,15 @@
 #include "mutex.h"
 #include "status.h"
 #include "utils.h"
-#include "monitor_status.h"
+#include "image_status.h"
 
 #define PRIORITY_RECV_MONITOR 30
 #define PRIORITY_CONNECT_ROBOT 20
 #define PRIORITY_MOVE_ROBOT 10
 #define PRIORITY_SEND_MONITOR 25
 #define PRIORITY_BATTERY_STATE 25
-#define PRIORITY_IMAGE 25
+#define PRIORITY_IMAGE_NORMAL 25
+#define PRIORITY_IMAGE_COMPUTE 25
 #define PRIORITY_WATCHDOG 5
 
 RT_TASK task_thread_batterie_state;
@@ -20,7 +21,8 @@ RT_TASK task_thread_recv_monitor;
 RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
-RT_TASK task_thread_image;
+RT_TASK task_thread_image_normal;
+RT_TASK task_thread_image_compute;
 // RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
@@ -29,7 +31,8 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_recv_monitor,
     &task_thread_move_robot,
     &task_thread_battery_state,
-    &task_thread_image,
+    &task_thread_image_normal,
+    &task_thread_image_compute,
     // &task_thread_watchdog,
     NULL
 };
@@ -40,7 +43,8 @@ void (*threads_functions_tab[])(void *) = {
     &thread_recv_monitor,
     &thread_move_robot,
     &thread_battery_state,
-    &thread_image,
+    &thread_image_normal,
+    &thread_image_compute,
     // &thread_watchdog,
     NULL
 };
@@ -51,7 +55,8 @@ int threads_priority[] = {
     PRIORITY_RECV_MONITOR,
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
-    PRIORITY_IMAGE,
+    PRIORITY_IMAGE_NORMAL,
+    PRIORITY_IMAGE_COMPUTE,
     // PRIORITY_WATCHDOG,
     -1
 };
@@ -178,10 +183,10 @@ void thread_recv_monitor(void *arg) {
 
     LOG_RECV_MONITOR("Binding server ...\n");
     serveur->open(serveur, "8000");
+    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
 
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
-        monitor_status_set(MONITOR_STATUS_OK);
 
         size = serveur->receive(serveur, msg);
         num_msg++;
@@ -202,6 +207,12 @@ void thread_recv_monitor(void *arg) {
                             LOG_RECV_MONITOR("ACTION_CONNECT_ROBOT\n");
                             rt_sem_v(&semConnecterRobot);
                             break;
+
+                        case ACTION_FIND_ARENA:
+                            LOG_RECV_MONITOR("ACTION_FIND_ARENA\n");
+                            image_status_set(IMAGE_STATUS_DETECT_AREA);
+                            break;
+
                     }
                     break;
                 case MESSAGE_TYPE_MOVEMENT:
@@ -312,7 +323,7 @@ void thread_battery_state(void * args){
 * Periodic thread 600ms
 * Send images to client if connected
 */
-void thread_image(void * args)
+void thread_image_normal(void * args)
 {
     DImage *image;
     DJpegimage *jpeg;
@@ -324,7 +335,7 @@ void thread_image(void * args)
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
 
-        if(monitor_status_check()) // se lance 
+        if(image_status_wait_for(IMAGE_STATUS_TAKE_SIMPLE)) // se lance 
         {
 
             image = d_new_image();
@@ -350,6 +361,50 @@ void thread_image(void * args)
             } else {
                 LOG_IMAGE("Problem while get_frame\n");
             }
+        }
+    }
+
+}
+
+void thread_image_compute(void * args)
+{
+    DImage *image;
+    DJpegimage *jpeg;
+    DMessage *message;
+
+    rt_task_set_periodic(NULL, TM_NOW, 600000000);
+    
+    while (1) {
+        rt_task_wait_period(NULL);
+        LOG_IMAGE("Activation périodique\n");
+
+        if(image_status_wait_for(IMAGE_STATUS_DETECT_AREA)) // se lance 
+        {
+
+            LOG_IMAGE("there\n");
+            // image = d_new_image();
+            // if(image != NULL && camera->get_frame(camera, image) == 0)
+            // {
+
+            //     jpeg = d_new_jpegimage();
+            //     if(jpeg != NULL)
+            //     {
+            //         jpeg->compress(jpeg, image);
+            //         message = d_new_message();
+            //         message->put_jpeg_image(message, jpeg);
+
+            //         LOG_IMAGE("Send image\n");
+            //         msg_queue_write(message);
+            //         message->free(message);
+            //         jpeg->free(jpeg);
+            //         image->free(image);
+            //     } else {
+            //         LOG_IMAGE("problem while compressing\n");
+            //         image->free(image);
+            //     }
+            // } else {
+            //     LOG_IMAGE("Problem while get_frame\n");
+            // }
         }
     }
 

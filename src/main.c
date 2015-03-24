@@ -75,7 +75,7 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
 
-    if ((err = rt_sem_create(&semMonitorStatusOk, NULL, 0, S_FIFO))) {
+    if ((err = rt_sem_create(&semMonitorStatusUpdated, NULL, 0, S_FIFO))) {
         rt_printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
