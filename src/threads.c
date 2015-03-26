@@ -176,6 +176,8 @@ void thread_recv_monitor(void *arg) {
     LOG_RECV_MONITOR("Binding server ...\n");
     serveur->open(serveur, "8000");
 
+    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
+
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
 
@@ -337,6 +339,8 @@ void thread_image_normal(void * args)
     while (1) {
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
+
+        image_status_wait_for(IMAGE_STATUS_TAKE_SIMPLE);
 
         image = get_image();
         if(image != NULL)

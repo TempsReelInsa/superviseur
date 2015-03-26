@@ -80,6 +80,11 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
 
+    if ((err = rt_sem_create(&semDetectArena, NULL, 0, S_FIFO))) {
+        rt_printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
     /* Creation des taches */
     threads_init();
 
