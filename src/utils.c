@@ -11,7 +11,6 @@ void restart_robot()
 void restart_all()
 {
 	restart_robot();
-	image_status_set(IMAGE_STATUS_NO);
 	serveur->close(serveur); // restart server
 	serveur->open(serveur, "8000");
 }

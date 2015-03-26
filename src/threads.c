@@ -12,7 +12,6 @@
 #define PRIORITY_SEND_MONITOR 90
 #define PRIORITY_BATTERY_STATE 10
 #define PRIORITY_IMAGE_NORMAL 20
-#define PRIORITY_IMAGE_COMPUTE 25
 #define PRIORITY_WATCHDOG 95
 
 RT_TASK task_thread_batterie_state;
@@ -22,7 +21,6 @@ RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
 RT_TASK task_thread_image_normal;
-RT_TASK task_thread_image_compute;
 // RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
@@ -32,7 +30,6 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_move_robot,
     &task_thread_battery_state,
     &task_thread_image_normal,
-    &task_thread_image_compute,
     // &task_thread_watchdog,
     NULL
 };
@@ -44,7 +41,6 @@ void (*threads_functions_tab[])(void *) = {
     &thread_move_robot,
     &thread_battery_state,
     &thread_image_normal,
-    &thread_image_compute,
     // &thread_watchdog,
     NULL
 };
@@ -56,7 +52,6 @@ int threads_priority[] = {
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
     PRIORITY_IMAGE_NORMAL,
-    PRIORITY_IMAGE_COMPUTE,
     // PRIORITY_WATCHDOG,
     -1
 };
@@ -180,7 +175,6 @@ void thread_recv_monitor(void *arg) {
 
     LOG_RECV_MONITOR("Binding server ...\n");
     serveur->open(serveur, "8000");
-    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
 
     while (1) {
         LOG_RECV_MONITOR("Wait message ...\n");
@@ -208,6 +202,16 @@ void thread_recv_monitor(void *arg) {
                         case ACTION_FIND_ARENA:
                             LOG_RECV_MONITOR("ACTION_FIND_ARENA\n");
                             image_set_detect_area(IMAGE_FIND_ARENA);
+                            break;
+
+                        case ACTION_ARENA_FAILED:
+                            LOG_RECV_MONITOR("ACTION_ARENA_FAILED\n");
+                            image_set_detect_area(IMAGE_FIND_ARENA_FAILED);
+                            break;
+
+                        case ACTION_ARENA_IS_FOUND:
+                            LOG_RECV_MONITOR("ACTION_ARENA_IS_FOUND\n");
+                            image_set_detect_area(IMAGE_FIND_ARENA_IS_FOUND);
                             break;
 
                     }
@@ -328,119 +332,66 @@ void thread_image_normal(void * args)
     DArena * arena;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
+
     
     while (1) {
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
 
-        if(image_status_wait_for(IMAGE_STATUS_TAKE_SIMPLE)) // se lance 
+        image = d_new_image();
+        if(image != NULL && camera->get_frame(camera, image) == 0)
         {
+            if(image_get_detect_area() == IMAGE_FIND_ARENA){
+                arena = image->compute_arena_position(image);
+                if(arena != NULL){
+                    d_imageshop_draw_arena(image,arena);
+                    image_set_detect_area(IMAGE_FIND_ARENA_WAIT);
+                }
+                else{
+                    LOG_IMAGE("Failed to find arena\n");
+                }
+            }
 
-            image = d_new_image();
-            if(image != NULL && camera->get_frame(camera, image) == 0)
+            jpeg = d_new_jpegimage();
+            if(jpeg != NULL)
             {
-                if(image_get_detect_area() == IMAGE_FIND_ARENA){
-                    arena = image->compute_arena_position(image);
-                    if(arena != NULL){
-                        d_imageshop_draw_arena(image,arena);
-                        image_status_set(IMAGE_STATUS_DETECT_AREA);
-                    }
-                    else{
-                        LOG_IMAGE("Failed to find arena\n");
+                jpeg->compress(jpeg, image);
+                message = d_new_message();
+                message->put_jpeg_image(message, jpeg);
+
+                LOG_IMAGE("Send image\n");
+                msg_queue_write(message);
+                message->free(message);
+                jpeg->free(jpeg);
+                image->free(image);
+
+                if(image_get_detect_area() != IMAGE_FIND_ARENA_NO){
+
+                    image_no_wait_detect_area();
+
+                    LOG_IMAGE("IMAGE_STATUS_DETECT_AREA %d\n", image_get_detect_area());
+                    switch(image_get_detect_area()){
+                        default:
+                        case IMAGE_FIND_ARENA:
+                        break;
+
+                        case IMAGE_FIND_ARENA_FAILED:
+                        case IMAGE_FIND_ARENA_IS_FOUND:
+                            image_set_detect_area(IMAGE_FIND_ARENA_NO);
+                        break;
                     }
                 }
 
-                jpeg = d_new_jpegimage();
-                if(jpeg != NULL)
-                {
-                    jpeg->compress(jpeg, image);
-                    message = d_new_message();
-                    message->put_jpeg_image(message, jpeg);
-
-                    LOG_IMAGE("Send image\n");
-                    msg_queue_write(message);
-                    message->free(message);
-                    jpeg->free(jpeg);
-                    image->free(image);
-
-                } else {
-                    LOG_IMAGE("problem while compressing\n");
-                    image->free(image);
-                }
             } else {
-                LOG_IMAGE("Problem while get_frame\n");
+                LOG_IMAGE("problem while compressing\n");
+                image->free(image);
             }
+        } else {
+            LOG_IMAGE("Problem while get_frame\n");
         }
-        else if(image_status_wait_for(IMAGE_STATUS_DETECT_AREA)){
+       
             
-            LOG_IMAGE("IMAGE_STATUS_DETECT_AREA %d\n", image_get_detect_area());
-            switch(image_get_detect_area()){
-                case IMAGE_FIND_ARENA:
-                    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
-                break;
-
-                default:
-                case IMAGE_FIND_ARENA_WAIT:
-                break;
-
-                case IMAGE_FIND_ARENA_FAILED:
-                    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
-                    image_set_detect_area(IMAGE_FIND_ARENA_NO);
-                break;
-
-                case IMAGE_FIND_ARENA_IS_FOUND:
-                    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
-                    image_set_detect_area(IMAGE_FIND_ARENA_NO);
-
-                break;
-            }
-        }
     }
-
-}
-
-void thread_image_compute(void * args)
-{
-    DImage *image;
-    DJpegimage *jpeg;
-    DMessage *message;
-
-    rt_task_set_periodic(NULL, TM_NOW, 600000000);
-    
-    while (1) {
-        rt_task_wait_period(NULL);
-        LOG_IMAGE("Activation périodique\n");
-
-        if(image_status_wait_for(IMAGE_STATUS_DETECT_AREA)) // se lance 
-        {
-
-            LOG_IMAGE("there\n");
-            // image = d_new_image();
-            // if(image != NULL && camera->get_frame(camera, image) == 0)
-            // {
-
-            //     jpeg = d_new_jpegimage();
-            //     if(jpeg != NULL)
-            //     {
-            //         jpeg->compress(jpeg, image);
-            //         message = d_new_message();
-            //         message->put_jpeg_image(message, jpeg);
-
-            //         LOG_IMAGE("Send image\n");
-            //         msg_queue_write(message);
-            //         message->free(message);
-            //         jpeg->free(jpeg);
-            //         image->free(image);
-            //     } else {
-            //         LOG_IMAGE("problem while compressing\n");
-            //         image->free(image);
-            //     }
-            // } else {
-            //     LOG_IMAGE("Problem while get_frame\n");
-            // }
-        }
-    }
-
 }
 
 void thread_watchdog(void * args){
