@@ -16,6 +16,7 @@
 #define IMAGE_COMPUTE_POS_NOT_OK 0
 #define IMAGE_COMPUTE_POS_OK 1
 
+void image_reset_all();
 void image_status_set(int status);
 void image_status_wait_for(int status);
 int image_get_detect_area();
