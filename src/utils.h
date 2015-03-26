@@ -7,4 +7,8 @@
 void restart_robot();
 void restart_all();
 
+DImage *get_image();
+DJpegimage *get_jpeg_from_image(DImage *i);
+DJpegimage *get_jpeg();
+
 #endif
