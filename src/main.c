@@ -96,6 +96,7 @@ void initStruct(void) {
     serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
+    arena = NULL;
 
     if(camera->open(camera))
     {

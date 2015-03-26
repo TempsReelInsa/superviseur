@@ -17,3 +17,4 @@ DMovement *move;
 DServer *serveur;
 DBattery *battery;
 DCamera *camera;
+DArena * arena;

@@ -22,6 +22,7 @@ extern DRobot *robot;
 extern DMovement *move;
 extern DBattery *battery;
 extern DCamera *camera;
+extern DArena *arena;
 
 #endif	/* GLOBAL_H */
 

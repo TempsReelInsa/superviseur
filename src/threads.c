@@ -329,7 +329,7 @@ void thread_image_normal(void * args)
     DImage *image;
     DJpegimage *jpeg;
     DMessage *message;
-    DArena * arena;
+    DArena * arena_tmp;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
 
@@ -342,9 +342,9 @@ void thread_image_normal(void * args)
         if(image != NULL && camera->get_frame(camera, image) == 0)
         {
             if(image_get_detect_area() == IMAGE_FIND_ARENA){
-                arena = image->compute_arena_position(image);
-                if(arena != NULL){
-                    d_imageshop_draw_arena(image,arena);
+                arena_tmp = image->compute_arena_position(image);
+                if(arena_tmp != NULL){
+                    d_imageshop_draw_arena(image,arena_tmp);
                     image_set_detect_area(IMAGE_FIND_ARENA_WAIT);
                 }
                 else{
@@ -375,8 +375,19 @@ void thread_image_normal(void * args)
                         case IMAGE_FIND_ARENA:
                         break;
 
-                        case IMAGE_FIND_ARENA_FAILED:
                         case IMAGE_FIND_ARENA_IS_FOUND:
+                            mutex_arena_acquire();
+                            arena = arena_tmp;
+                            mutex_arena_release();
+
+                            image_set_detect_area(IMAGE_FIND_ARENA_NO);
+                        break;
+
+                        case IMAGE_FIND_ARENA_FAILED:
+                            mutex_arena_acquire();
+                            arena = NULL;
+                            mutex_arena_release();
+
                             image_set_detect_area(IMAGE_FIND_ARENA_NO);
                         break;
                     }
