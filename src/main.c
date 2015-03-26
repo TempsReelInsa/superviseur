@@ -96,9 +96,17 @@ void initStruct(void) {
     msg_queue_init();
 
     /* Creation des structures globales du projet */
+    serveur = d_new_server();
+
+    if(serveur == NULL)
+    {
+        perror("create server");
+        DPRINTF("Impossible d'ouvrir le serveur\n");
+        exit(EXIT_FAILURE);
+    }
+
     robot = d_new_robot();
     move = d_new_movement();
-    serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
     arena = NULL;

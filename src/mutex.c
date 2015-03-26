@@ -13,22 +13,27 @@ void mutex_init(){
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+
     if ((err = rt_mutex_create(&mutexMove, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+
     if ((err = rt_mutex_create(&mutexBattery, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+
     if ((err = rt_mutex_create(&mutexImageStatus, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+
     if ((err = rt_mutex_create(&mutexArena, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
+
 }
 
 void mutex_acquire(RT_MUTEX mutex){

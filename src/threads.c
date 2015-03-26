@@ -103,7 +103,8 @@ void thread_send_monitor(void * arg) {
     BEGIN_THREAD();
 
     while (1) {
-        if ((err = msg_queue_get(&msg)) >= 0 && serveur->is_active(serveur)) {
+        if ((err = msg_queue_get(&msg)) >= 0)
+        {
             LOG_SEND_MONITOR("Sending message to monitor ... \n");
             serveur->send(serveur, msg);
             msg->free(msg);
@@ -168,24 +169,31 @@ void thread_connect_robot(void * arg) {
 void thread_recv_monitor(void *arg) {
     DMessage *msg = d_new_message();
     DAction *action;
-    int size;
+    int size = 0;
     int num_msg = 0;
 
     BEGIN_THREAD();
 
     LOG_RECV_MONITOR("Binding server ...\n");
-    serveur->open(serveur, "8000");
+    if(serveur->bind(serveur, "8000") != 0)
+    {
+        LOG_RECV_MONITOR("Error while binding...\n");
+        perror("bind server");
+        exit(EXIT_FAILURE);
+    }
 
-    image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
+    while(1)
+    {
+        LOG_RECV_MONITOR("Wait for a client ...\n");
+        serveur->accept(serveur);
+        LOG_RECV_MONITOR("Client !\n");
 
-    while (1) {
-        LOG_RECV_MONITOR("Wait message ...\n");
+        image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
 
-        size = serveur->receive(serveur, msg);
-        num_msg++;
-
-        if (size > 0)
+        while((size = serveur->receive(serveur, msg)) > 0)
         {
+            num_msg++;
+
             LOG_RECV_MONITOR("Message #%d\n", num_msg);
 
             switch (msg->get_type(msg))
@@ -235,12 +243,12 @@ void thread_recv_monitor(void *arg) {
                     mutex_robot_release();
                     break;
             }
-        }
-        else
-        {
-            LOG_RECV_MONITOR("Client disconnected, restart all\n");
-            restart_all();
-        }
+
+        }        
+
+        // client disconnected, restart all
+        LOG_RECV_MONITOR("Client disconnected, restart all\n");
+        restart_all();
     }
 }
 

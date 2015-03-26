@@ -76,7 +76,6 @@ void image_no_wait_detect_area(){
 	mutex_image_status_release();
 
 	while(ret == IMAGE_FIND_ARENA_WAIT){
-		DPRINTF("Wait detect area update ... \n");
 		if(rt_sem_p(&semDetectArena, TM_INFINITE) !=0 )
 		{
 			perror("rt_sem_p");
