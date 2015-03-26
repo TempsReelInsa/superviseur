@@ -338,8 +338,8 @@ void thread_image_normal(void * args)
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
 
-        image = d_new_image();
-        if(image != NULL && camera->get_frame(camera, image) == 0)
+        image = get_image();
+        if(image != NULL)
         {
             if(image_get_detect_area() == IMAGE_FIND_ARENA){
                 arena = image->compute_arena_position(image);
@@ -352,10 +352,9 @@ void thread_image_normal(void * args)
                 }
             }
 
-            jpeg = d_new_jpegimage();
+            jpeg = get_jpeg_from_image(image);
             if(jpeg != NULL)
             {
-                jpeg->compress(jpeg, image);
                 message = d_new_message();
                 message->put_jpeg_image(message, jpeg);
 
