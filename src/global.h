@@ -27,6 +27,7 @@ extern DBattery *battery;
 extern DCamera *camera;
 extern DArena *arena;
 extern DMission *mission;
+extern DPosition *position;
 
 #endif	/* GLOBAL_H */
 

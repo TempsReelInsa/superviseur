@@ -21,3 +21,4 @@ DBattery *battery;
 DCamera *camera;
 DArena * arena;
 DMission *mission;
+DPosition *position;

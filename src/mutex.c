@@ -6,6 +6,7 @@ RT_MUTEX mutexBattery;
 RT_MUTEX mutexImageStatus;
 RT_MUTEX mutexArena;
 RT_MUTEX mutexMission;
+RT_MUTEX mutexPosition;
 
 void mutex_init(){
     int err;
@@ -36,6 +37,10 @@ void mutex_init(){
     }
 
     if ((err = rt_mutex_create(&mutexMission, NULL))) {
+        rt_printf("Error mutex create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+    if ((err = rt_mutex_create(&mutexPosition, NULL))) {
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -102,4 +107,12 @@ void mutex_mission_acquire(){
 
 void mutex_mission_release(){
     mutex_release(mutexMission);
+}
+
+void mutex_position_acquire(){
+    mutex_acquire(mutexPosition);
+}
+
+void mutex_position_release(){
+    mutex_release(mutexPosition);
 }

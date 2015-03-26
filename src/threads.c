@@ -355,7 +355,7 @@ void thread_image_normal(void * args)
     DJpegimage *jpeg;
     DMessage *message;
     DArena * arena_tmp;
-    DPosition *position;
+    DPosition *position_tmp;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
 
@@ -383,18 +383,28 @@ void thread_image_normal(void * args)
 
             if(arena != NULL && image_is_compute_position())
             {
-                position = image->compute_robot_position(image, arena);
-                if(position != NULL)
+                position_tmp = image->compute_robot_position(image, arena);
+                if(position_tmp != NULL)
                 {
-                    d_imageshop_draw_position(image, position);
+                    d_imageshop_draw_position(image, position_tmp);
                     message = d_new_message();
-                    message->put_position(message, position);
+                    message->put_position(message, position_tmp);
+
+                    mutex_position_acquire();
+                    position = position_tmp;
+                    mutex_position_release();
+
                     msg_queue_write(message);
                     message->free(message);
-                    position->free(position);
+                    position_tmp->free(position_tmp);
                 } else {
                     LOG_IMAGE("Failed to find robot position\n");
                 }
+            }
+            else{
+                mutex_position_acquire();
+                position = NULL;
+                mutex_position_release();
             }
 
             jpeg = get_jpeg_from_image(image);

@@ -24,4 +24,7 @@ void mutex_arena_release();
 void mutex_mission_acquire();
 void mutex_mission_release();
 
+void mutex_position_acquire();
+void mutex_position_release();
+
 #endif	/* MUTEX_H */

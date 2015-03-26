@@ -116,6 +116,7 @@ void initStruct(void) {
     camera = d_new_camera();
     arena = NULL;
     mission = d_new_mission();
+    position = NULL;
     
     if(camera->open(camera))
     {
