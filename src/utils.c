@@ -11,50 +11,50 @@ void restart_robot()
 void restart_all()
 {
 	restart_robot();
-	image_status_set(IMAGE_STATUS_NO);
 	serveur->close(serveur); // restart server
+	image_reset_all(IMAGE_STATUS_NO);
 	serveur->open(serveur, "8000");
 }
 
-// DImage *get_image()
-// {
-// 	DImage *image = d_new_image();
+DImage *get_image()
+{
+	DImage *image = d_new_image();
 
-// 	if(image != NULL)
-// 	{
-// 		camera->get_frame(camera, image);
-// 	}
+	if(image != NULL)
+	{
+		camera->get_frame(camera, image);
+	}
 
-// 	return image;
-// }
+	return image;
+}
 
-// DJpegimage *get_jpeg_from_image(DImage *i)
-// {
-// 	DJpegimage * jpeg = d_new_jpegimage();
+DJpegimage *get_jpeg_from_image(DImage *i)
+{
+	DJpegimage * jpeg = d_new_jpegimage();
 
-// 	if(jpeg != NULL)
-// 	{
-// 		jpeg->compress(jpeg, i);
-// 	}
+	if(jpeg != NULL)
+	{
+		jpeg->compress(jpeg, i);
+	}
 
-// 	return jpeg;
-// }
+	return jpeg;
+}
 
-// DJpegimage *get_jpeg()
-// {
-// 	DImage *img = get_image();
-// 	DJpegimage *jpeg = NULL;
+DJpegimage *get_jpeg()
+{
+	DImage *img = get_image();
+	DJpegimage *jpeg = NULL;
 
-// 	if(img != NULL)
-// 	{
-// 		if((jpeg = get_jpeg_from_image(img)) != NULL)
-// 		{
-// 			return jpeg;
-// 		} else {
-// 			img->free(img);
-// 			return NULL;
-// 		}
-// 	} else {
-// 		return NULL;
-// 	}
-// }
+	if(img != NULL)
+	{
+		if((jpeg = get_jpeg_from_image(img)) != NULL)
+		{
+			return jpeg;
+		} else {
+			img->free(img);
+			return NULL;
+		}
+	} else {
+		return NULL;
+	}
+}

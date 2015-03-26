@@ -80,6 +80,11 @@ void initStruct(void) {
         exit(EXIT_FAILURE);
     }
 
+    if ((err = rt_sem_create(&semDetectArena, NULL, 0, S_FIFO))) {
+        rt_printf("Error semaphore create: %s\n", strerror(-err));
+        exit(EXIT_FAILURE);
+    }
+
     /* Creation des taches */
     threads_init();
 
@@ -96,6 +101,7 @@ void initStruct(void) {
     serveur = d_new_server();
     battery = d_new_battery();
     camera = d_new_camera();
+    arena = NULL;
 
     if(camera->open(camera))
     {

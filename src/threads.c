@@ -6,14 +6,13 @@
 #include "utils.h"
 #include "image_status.h"
 
-#define PRIORITY_RECV_MONITOR 30
-#define PRIORITY_CONNECT_ROBOT 20
-#define PRIORITY_MOVE_ROBOT 10
-#define PRIORITY_SEND_MONITOR 25
-#define PRIORITY_BATTERY_STATE 25
-#define PRIORITY_IMAGE_NORMAL 25
-#define PRIORITY_IMAGE_COMPUTE 25
-#define PRIORITY_WATCHDOG 5
+#define PRIORITY_RECV_MONITOR 80
+#define PRIORITY_CONNECT_ROBOT 70
+#define PRIORITY_MOVE_ROBOT 30
+#define PRIORITY_SEND_MONITOR 90
+#define PRIORITY_BATTERY_STATE 10
+#define PRIORITY_IMAGE_NORMAL 20
+#define PRIORITY_WATCHDOG 95
 
 RT_TASK task_thread_batterie_state;
 RT_TASK task_thread_connect_robot;
@@ -22,7 +21,6 @@ RT_TASK task_thread_send_monitor;
 RT_TASK task_thread_move_robot;
 RT_TASK task_thread_battery_state;
 RT_TASK task_thread_image_normal;
-RT_TASK task_thread_image_compute;
 // RT_TASK task_thread_watchdog;
 
 RT_TASK *threads_tasks_tab[] = {
@@ -32,7 +30,6 @@ RT_TASK *threads_tasks_tab[] = {
     &task_thread_move_robot,
     &task_thread_battery_state,
     &task_thread_image_normal,
-    &task_thread_image_compute,
     // &task_thread_watchdog,
     NULL
 };
@@ -44,7 +41,6 @@ void (*threads_functions_tab[])(void *) = {
     &thread_move_robot,
     &thread_battery_state,
     &thread_image_normal,
-    &thread_image_compute,
     // &thread_watchdog,
     NULL
 };
@@ -56,7 +52,6 @@ int threads_priority[] = {
     PRIORITY_MOVE_ROBOT,
     PRIORITY_BATTERY_STATE,
     PRIORITY_IMAGE_NORMAL,
-    PRIORITY_IMAGE_COMPUTE,
     // PRIORITY_WATCHDOG,
     -1
 };
@@ -133,14 +128,10 @@ void thread_connect_robot(void * arg) {
         mutex_robot_acquire();  
         status = robot->open_device(robot);
 
-        status_process_hard(status);
-
-        if (status_check(0)) {
+        if (status == STATUS_OK) {
             status = robot->start_insecurely(robot);
-            DPRINTF("-------> status = %d\n",status);
-            status_process_hard(status);
             
-            if (status_check(0)){
+            if (status == STATUS_OK){
 
                 LOG_CONNECT_ROBOT("********> Robot démarrer<**********\n");
                 LOG_CONNECT_ROBOT("tconnect : Launch Watchdog\n");
@@ -156,6 +147,7 @@ void thread_connect_robot(void * arg) {
                     message->free(message);
                 }
             }
+            status_process_hard(status);
         }
         
         mutex_robot_release();
@@ -183,6 +175,7 @@ void thread_recv_monitor(void *arg) {
 
     LOG_RECV_MONITOR("Binding server ...\n");
     serveur->open(serveur, "8000");
+
     image_status_set(IMAGE_STATUS_TAKE_SIMPLE);
 
     while (1) {
@@ -210,7 +203,27 @@ void thread_recv_monitor(void *arg) {
 
                         case ACTION_FIND_ARENA:
                             LOG_RECV_MONITOR("ACTION_FIND_ARENA\n");
-                            image_status_set(IMAGE_STATUS_DETECT_AREA);
+                            image_set_detect_area(IMAGE_FIND_ARENA);
+                            break;
+
+                        case ACTION_ARENA_FAILED:
+                            LOG_RECV_MONITOR("ACTION_ARENA_FAILED\n");
+                            image_set_detect_area(IMAGE_FIND_ARENA_FAILED);
+                            break;
+
+                        case ACTION_ARENA_IS_FOUND:
+                            LOG_RECV_MONITOR("ACTION_ARENA_IS_FOUND\n");
+                            image_set_detect_area(IMAGE_FIND_ARENA_IS_FOUND);
+                            break;
+
+                        case ACTION_COMPUTE_CONTINUOUSLY_POSITION:
+                            LOG_RECV_MONITOR("ACTION_COMPUTE_CONTINUOUSLY_POSITION");
+                            image_set_compute_position(IMAGE_COMPUTE_POS_OK);
+                            break;
+
+                        case ACTION_STOP_COMPUTE_POSITION:
+                            LOG_RECV_MONITOR("ACTION_STOP_COMPUTE_POSITION");
+                            image_set_compute_position(IMAGE_COMPUTE_POS_NOT_OK);
                             break;
 
                     }
@@ -328,138 +341,136 @@ void thread_image_normal(void * args)
     DImage *image;
     DJpegimage *jpeg;
     DMessage *message;
+    DArena * arena_tmp;
+    DPosition *position;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
+
     
     while (1) {
         rt_task_wait_period(NULL);
         LOG_IMAGE("Activation périodique\n");
 
-        if(image_status_wait_for(IMAGE_STATUS_TAKE_SIMPLE)) // se lance 
+        image_status_wait_for(IMAGE_STATUS_TAKE_SIMPLE);
+
+        image = get_image();
+        if(image != NULL)
         {
 
-            image = d_new_image();
-            if(image != NULL && camera->get_frame(camera, image) == 0)
+            if(image_get_detect_area() == IMAGE_FIND_ARENA){
+                arena_tmp = image->compute_arena_position(image);
+                if(arena_tmp != NULL){
+                    d_imageshop_draw_arena(image,arena_tmp);
+                    image_set_detect_area(IMAGE_FIND_ARENA_WAIT);
+                }
+                else{
+                    LOG_IMAGE("Failed to find arena\n");
+                }
+            }
+
+            if(arena != NULL && image_is_compute_position())
             {
-
-                jpeg = d_new_jpegimage();
-                if(jpeg != NULL)
+                position = image->compute_robot_position(image, arena);
+                if(position != NULL)
                 {
-                    jpeg->compress(jpeg, image);
+                    d_imageshop_draw_position(image, position);
                     message = d_new_message();
-                    message->put_jpeg_image(message, jpeg);
-
-                    LOG_IMAGE("Send image\n");
+                    message->put_position(message, position);
                     msg_queue_write(message);
                     message->free(message);
-                    jpeg->free(jpeg);
-                    image->free(image);
+                    position->free(position);
                 } else {
-                    LOG_IMAGE("problem while compressing\n");
-                    image->free(image);
+                    LOG_IMAGE("Failed to find robot position\n");
                 }
-            } else {
-                LOG_IMAGE("Problem while get_frame\n");
             }
+
+            jpeg = get_jpeg_from_image(image);
+            if(jpeg != NULL)
+            {
+                message = d_new_message();
+                message->put_jpeg_image(message, jpeg);
+
+                LOG_IMAGE("Send image\n");
+                msg_queue_write(message);
+                message->free(message);
+                jpeg->free(jpeg);
+                image->free(image);
+
+                if(image_get_detect_area() != IMAGE_FIND_ARENA_NO){
+
+                    image_no_wait_detect_area();
+
+                    LOG_IMAGE("IMAGE_STATUS_DETECT_AREA %d\n", image_get_detect_area());
+                    switch(image_get_detect_area()){
+                        default:
+                        case IMAGE_FIND_ARENA:
+                        break;
+
+                        case IMAGE_FIND_ARENA_IS_FOUND:
+                            mutex_arena_acquire();
+                            arena = arena_tmp;
+                            mutex_arena_release();
+
+                            image_set_detect_area(IMAGE_FIND_ARENA_NO);
+                        break;
+
+                        case IMAGE_FIND_ARENA_FAILED:
+                            mutex_arena_acquire();
+                            arena = NULL;
+                            mutex_arena_release();
+
+                            image_set_detect_area(IMAGE_FIND_ARENA_NO);
+                        break;
+                    }
+                }
+
+            } else {
+                LOG_IMAGE("problem while compressing\n");
+                image->free(image);
+            }
+        } else {
+            LOG_IMAGE("Problem while get_frame\n");
         }
+       
+            
     }
-
-}
-
-void thread_image_compute(void * args)
-{
-    DImage *image;
-    DJpegimage *jpeg;
-    DMessage *message;
-
-    rt_task_set_periodic(NULL, TM_NOW, 600000000);
-    
-    while (1) {
-        rt_task_wait_period(NULL);
-        LOG_IMAGE("Activation périodique\n");
-
-        if(image_status_wait_for(IMAGE_STATUS_DETECT_AREA)) // se lance 
-        {
-
-            LOG_IMAGE("there\n");
-            // image = d_new_image();
-            // if(image != NULL && camera->get_frame(camera, image) == 0)
-            // {
-
-            //     jpeg = d_new_jpegimage();
-            //     if(jpeg != NULL)
-            //     {
-            //         jpeg->compress(jpeg, image);
-            //         message = d_new_message();
-            //         message->put_jpeg_image(message, jpeg);
-
-            //         LOG_IMAGE("Send image\n");
-            //         msg_queue_write(message);
-            //         message->free(message);
-            //         jpeg->free(jpeg);
-            //         image->free(image);
-            //     } else {
-            //         LOG_IMAGE("problem while compressing\n");
-            //         image->free(image);
-            //     }
-            // } else {
-            //     LOG_IMAGE("Problem while get_frame\n");
-            // }
-        }
-    }
-
 }
 
 void thread_watchdog(void * args){
-    // int status;
-    // unsigned int nbrErreur = 0;
-    // DMessage *message;
+    int status;
+    DMessage *message;
 
-    // BEGIN_THREAD();
+    BEGIN_THREAD();
 
-    // while(1){
-    //     LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
-    //     rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
+    while(1){
+        LOG_WATCHDOG("thread_watchdog : Attente du sémarphore semLaunchWatchdog\n");
+        rt_sem_p(&semLaunchWatchdog, TM_INFINITE);
 
-    //     mutex_state_acquire();
-    //     status = etatCommRobot;
-    //     mutex_state_release();
-    //     LOG_WATCHDOG("thread_watchdog : Started\n");
-    //     rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+        LOG_WATCHDOG("thread_watchdog : Started\n");
+        rt_task_set_periodic(NULL, TM_NOW, 1000000000);
 
-    //     while(status==STATUS_OK){
-    //         LOG_WATCHDOG("thread_watchdog : I'm alive\n");
+        while(status_check(1)){
+            rt_task_wait_period(NULL);
 
-    //         mutex_robot_acquire();
-    //         status = robot->reload_wdt(robot);
-    //         print_status(status);
-    //         mutex_robot_release();
+            LOG_WATCHDOG("thread_watchdog : I'm alive\n");
 
-    //         if(status != STATUS_OK)
-    //         {
-    //             nbrErreur++;
-    //             status = STATUS_OK;
-    //         } else {
-    //             nbrErreur = 0;
-    //         }
+            mutex_robot_acquire();
+            status = robot->reload_wdt(robot);
+            mutex_robot_release();
 
-    //         if (status != STATUS_OK && nbrErreur >= 10) {
-    //             mutex_state_acquire();
-    //             etatCommRobot = status;
-    //             mutex_state_release();
+            status_process(status); 
 
-    //             message = d_new_message();
-    //             message->put_state(message, status);
+            if (status_check(0)) {
+                message = d_new_message();
+                message->put_state(message, status);
 
-    //             LOG_WATCHDOG("tmove : Envoi message\n");
-    //             if(msg_queue_write(message) < 0)
-    //             {
-    //                 message->free(message);
-    //             }
-    //             nbrErreur = 0;
-    //         }
-    //         rt_task_wait_period(NULL);
-    //     }
-    // }
+                LOG_WATCHDOG("Envoi message\n");
+                if(msg_queue_write(message) < 0)
+                {
+                    message->free(message);
+                }
+            }
+        }
+    }
 }
 

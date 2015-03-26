@@ -15,6 +15,7 @@ extern RT_SEM semConnecterRobot;
 extern RT_SEM semLaunchWatchdog;
 extern RT_SEM semStatusOk;
 extern RT_SEM semMonitorStatusUpdated;
+extern RT_SEM semDetectArena;
 
 /* @variables partagées */
 extern DServer *serveur;
@@ -22,6 +23,7 @@ extern DRobot *robot;
 extern DMovement *move;
 extern DBattery *battery;
 extern DCamera *camera;
+extern DArena *arena;
 
 #endif	/* GLOBAL_H */
 

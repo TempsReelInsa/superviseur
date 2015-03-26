@@ -11,9 +11,11 @@ RT_SEM semConnecterRobot;
 RT_SEM semLaunchWatchdog;
 RT_SEM semStatusOk;
 RT_SEM semMonitorStatusUpdated;
+RT_SEM semDetectArena;
 
 DRobot *robot;
 DMovement *move;
 DServer *serveur;
 DBattery *battery;
 DCamera *camera;
+DArena * arena;
