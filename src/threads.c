@@ -216,6 +216,16 @@ void thread_recv_monitor(void *arg) {
                             image_set_detect_area(IMAGE_FIND_ARENA_IS_FOUND);
                             break;
 
+                        case ACTION_COMPUTE_CONTINUOUSLY_POSITION:
+                            LOG_RECV_MONITOR("ACTION_COMPUTE_CONTINUOUSLY_POSITION");
+                            image_set_compute_position(IMAGE_COMPUTE_POS_OK);
+                            break;
+
+                        case ACTION_STOP_COMPUTE_POSITION:
+                            LOG_RECV_MONITOR("ACTION_STOP_COMPUTE_POSITION");
+                            image_set_compute_position(IMAGE_COMPUTE_POS_NOT_OK);
+                            break;
+
                     }
                     break;
                 case MESSAGE_TYPE_MOVEMENT:
@@ -332,6 +342,7 @@ void thread_image_normal(void * args)
     DJpegimage *jpeg;
     DMessage *message;
     DArena * arena_tmp;
+    DPosition *position;
 
     rt_task_set_periodic(NULL, TM_NOW, 600000000);
 
@@ -345,6 +356,7 @@ void thread_image_normal(void * args)
         image = get_image();
         if(image != NULL)
         {
+
             if(image_get_detect_area() == IMAGE_FIND_ARENA){
                 arena_tmp = image->compute_arena_position(image);
                 if(arena_tmp != NULL){
@@ -353,6 +365,22 @@ void thread_image_normal(void * args)
                 }
                 else{
                     LOG_IMAGE("Failed to find arena\n");
+                }
+            }
+
+            if(arena != NULL && image_is_compute_position())
+            {
+                position = image->compute_robot_position(image, arena);
+                if(position != NULL)
+                {
+                    d_imageshop_draw_position(image, position);
+                    message = d_new_message();
+                    message->put_position(message, position);
+                    msg_queue_write(message);
+                    message->free(message);
+                    position->free(position);
+                } else {
+                    LOG_IMAGE("Failed to find robot position\n");
                 }
             }
 

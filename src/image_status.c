@@ -4,9 +4,9 @@
 
 int image_status = IMAGE_STATUS_NO;
 int image_detect_area = IMAGE_FIND_ARENA_NO;
-int image_compute_position = 0;
+int image_compute_position = IMAGE_COMPUTE_POS_NOT_OK;
 
-int image_status_set(int status){
+void image_status_set(int status){
 	mutex_image_status_acquire();
 	image_status = status;
 	mutex_image_status_release();
@@ -37,17 +37,20 @@ void image_status_wait_for(int status){
 	}
 }
 
-int image_is_compute_position(){
+
+int image_is_compute_position()
+{
 	int ret;
 	mutex_image_status_acquire();
 	ret = image_compute_position;
 	mutex_image_status_release();
-	return ret;
+	return ret == IMAGE_COMPUTE_POS_OK;
 }
 
-void image_set_compute_position(int ret){
+void image_set_compute_position(int v)
+{
 	mutex_image_status_acquire();
-	image_compute_position = ret;
+	image_compute_position = v;
 	mutex_image_status_release();
 }
 
