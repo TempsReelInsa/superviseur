@@ -247,6 +247,11 @@ void thread_recv_monitor(void *arg) {
                     move->from_message(move, msg);
                     mutex_robot_release();
                     break;
+
+                case MESSAGE_TYPE_MISSION:
+                    LOG_RECV_MONITOR("MESSAGE_TYPE_MISSION\n");
+                    rt_sem_v(&semMissionOk);
+                    break;
             }
 
         }        
@@ -499,7 +504,9 @@ void thread_watchdog(void * args){
 
 void thread_mission(void * args){
     BEGIN_THREAD();
-    DPosition pos;
+    DPosition * pos;
+    int status;
+
     while(1){
         DPRINTF("Wait semaphore MISSION_OK\n");
         if(rt_sem_p(&semMissionOk,TM_INFINITE)!=0){
@@ -507,11 +514,20 @@ void thread_mission(void * args){
             exit(EXIT_FAILURE);
         }
 
-        mutex_mission_acquire();
-        mission->get_position(mission, &pos);
-        mutex_mission_release();
 
+        DPRINTF("Debut MISSION_OK\n");
 
+/*
+        mutex_position_acquire();
+        pos = position;
+        mutex_position_release();
+        //int test = rdx_to_deg(pos->get_orientation(pos));
+        //DPRINTF("MISSION pos robot %d %d (%f) \n",test,(test*2)%360,pos->get_orientation(pos));
+        */
+        mutex_robot_acquire();
+        status = robot->move(robot,245);
+        mutex_robot_release();
+        DPRINTF("MISSION status %d\n", status);
     }
 }
 

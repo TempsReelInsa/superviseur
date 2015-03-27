@@ -58,3 +58,7 @@ DJpegimage *get_jpeg()
 		return NULL;
 	}
 }
+
+int rdx_to_deg(float rdx){
+	return (int) (rdx*360.0 / (2 * M_PI));
+}

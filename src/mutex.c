@@ -44,7 +44,6 @@ void mutex_init(){
         rt_printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    mutex_mission_acquire();
 }
 
 void mutex_acquire(RT_MUTEX mutex){
