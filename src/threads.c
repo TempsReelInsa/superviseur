@@ -288,9 +288,9 @@ void thread_move_robot(void *arg) {
                     droite = MOTEUR_AVANT_LENT;
                     break;
             }
-            mutex_robot_release();
-
             status = robot->set_motors(robot, gauche, droite);
+
+            mutex_robot_release();
 
             status_process(status); 
         }
@@ -324,8 +324,9 @@ void thread_battery_state(void * args){
                 message = d_new_message();    
                 
                 mutex_battery_acquire();
-                if(tmp_battery!=BATTERY_LEVEL_UNKNOWN)
+                if(tmp_battery!=BATTERY_LEVEL_UNKNOWN){
                     battery->set_level(battery,tmp_battery);
+                }
                 message->put_battery_level(message,battery);
                 mutex_battery_release();
 
